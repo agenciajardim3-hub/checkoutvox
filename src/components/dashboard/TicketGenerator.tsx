@@ -61,7 +61,8 @@ export const TicketGenerator: React.FC<TicketGeneratorProps> = ({ allCheckouts }
         if (!printWindow) return;
 
         const rawDate = ticketGenData.date || selectedProd.eventDate || '';
-        const displayDate = formatDateForDisplay(rawDate) || 'Data não definida';
+        const hasValidDate = rawDate && rawDate !== 'Invalid Date';
+        const displayDate = hasValidDate ? formatDateForDisplay(rawDate) : '';
         const displayStartTime = ticketGenData.startTime || selectedProd.eventStartTime || '??:??';
         const displayEndTime = ticketGenData.endTime || selectedProd.eventEndTime || '??:??';
         const displayLocation = ticketGenData.address || selectedProd.eventLocation || 'Local não definido';
@@ -118,9 +119,9 @@ export const TicketGenerator: React.FC<TicketGeneratorProps> = ({ allCheckouts }
                </div>
 
                <div class="event-info-box">
-                  <div class="field" style="margin-bottom: 12px;">
-                    <div class="label" style="color: #b45309;">Data e Horário</div>
-                    <div style="font-size: 20px; font-weight: 900; color: #92400e;">${new Date(formatDateForJS(displayDate) + 'T12:00:00').toLocaleDateString('pt-BR')}</div>
+                   <div class="field" style="margin-bottom: 12px;">
+                     <div class="label" style="color: #b45309;">Data e Horário</div>
+                     <div style="font-size: 20px; font-weight: 900; color: #92400e;">${hasValidDate ? new Date(formatDateForJS(displayDate) + 'T12:00:00').toLocaleDateString('pt-BR') : 'Data não definida'}</div>
                     <div style="font-size: 14px; font-weight: 800; color: #b45309; margin-top: 5px;">Das ${displayStartTime} às ${displayEndTime}</div>
                   </div>
                   <div class="field" style="margin-bottom: 0;">
