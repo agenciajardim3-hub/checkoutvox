@@ -542,9 +542,13 @@ export const LeadsReport: React.FC<LeadsReportProps> = ({
                                                 <div id={`actions-${lead.id}`} className="hidden absolute right-0 top-10 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 min-w-[180px] text-left">
                                                     <button
                                                         onClick={() => {
+                                                            if (!lead.product_id) {
+                                                                alert('Este lead não tem um produto associado');
+                                                                return;
+                                                            }
                                                             const ticketUrl = `${window.location.origin}/?mode=ticket&checkout=${lead.product_id}&cpf=${lead.cpf}`;
-                                                            window.open(ticketUrl, '_blank');
                                                             document.getElementById(`actions-${lead.id}`)?.classList.add('hidden');
+                                                            window.open(ticketUrl, '_blank') || (window.location.href = ticketUrl);
                                                         }}
                                                         className="w-full px-4 py-2 text-left text-xs font-bold text-gray-700 hover:bg-purple-50 flex items-center gap-2"
                                                     >
@@ -552,9 +556,13 @@ export const LeadsReport: React.FC<LeadsReportProps> = ({
                                                     </button>
                                                     <button
                                                         onClick={() => {
+                                                            if (!lead.product_id) {
+                                                                alert('Este lead não tem um produto associado');
+                                                                return;
+                                                            }
                                                             const certUrl = `${window.location.origin}/?mode=certificate&checkout=${lead.product_id}&cpf=${lead.cpf}`;
-                                                            window.open(certUrl, '_blank');
                                                             document.getElementById(`actions-${lead.id}`)?.classList.add('hidden');
+                                                            window.open(certUrl, '_blank') || (window.location.href = certUrl);
                                                         }}
                                                         className="w-full px-4 py-2 text-left text-xs font-bold text-gray-700 hover:bg-amber-50 flex items-center gap-2"
                                                     >
