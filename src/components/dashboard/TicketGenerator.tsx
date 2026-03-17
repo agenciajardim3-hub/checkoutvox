@@ -111,7 +111,7 @@ export const TicketGenerator: React.FC<TicketGeneratorProps> = ({ allCheckouts }
                <div style="font-size: 10px; font-weight: 900; letter-spacing: 3px; color: #f59e0b; margin-bottom: 5px;">VIP ACCESS</div>
                <div style="font-size: 18px; font-weight: 900; text-transform: uppercase;">Acesso Autorizado</div>
             </div>
-            <img class="ticket-img" src="${selectedProd.productImage}" />
+            <img class="ticket-img" src="${selectedProd.productImage || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=60'}" onerror="this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=60'" />
             <div class="content">
                <div class="field">
                   <div class="label">Titular do Ingresso</div>
@@ -224,7 +224,7 @@ export const TicketGenerator: React.FC<TicketGeneratorProps> = ({ allCheckouts }
 
                     <div className="h-40 overflow-hidden relative bg-gray-100 flex items-center justify-center">
                         {ticketGenData.productId ? (
-                            <img src={allCheckouts.find(c => c.id === ticketGenData.productId)?.productImage} className="w-full h-full object-cover" alt="" />
+                            <img src={allCheckouts.find(c => c.id === ticketGenData.productId)?.productImage || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800'} onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800'; }} className="w-full h-full object-cover" alt="" />
                         ) : (
                             <ImageIcon size={40} className="text-gray-300" />
                         )}

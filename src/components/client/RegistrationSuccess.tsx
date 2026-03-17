@@ -32,7 +32,7 @@ export const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
                             <h2 className="text-xl font-black tracking-widest uppercase">VIP PASS • INGRESSO</h2>
                         </div>
                         <div className="h-40 overflow-hidden relative">
-                            <img src={config.productImage} className="w-full h-full object-cover" alt="" />
+                            <img src={config.productImage || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800'} onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800'; }} className="w-full h-full object-cover" alt="" />
                             <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent"></div>
                         </div>
                         <div className="p-8 space-y-6 text-left">
