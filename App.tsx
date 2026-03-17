@@ -95,7 +95,7 @@ export default function App() {
   };
 
   // Check if should show login (APK without checkout param shows login)
-  const isLogin = query.get('mode') === 'login' || window.location.pathname === '/login' || (window.location.pathname !== '/solicitacaoformulario' && !checkoutParam && userRole === 'none');
+  const isLogin = query.get('mode') === 'login' || window.location.pathname === '/login' || (window.location.pathname !== '/solicitacaoformulario' && !checkoutParam && !isCertificateMode && userRole === 'none');
   const isPaymentSuccess = query.get('success') === 'true';
   const isSolicitacaoForm = window.location.pathname === '/solicitacaoformulario' || query.get('mode') === 'solicitacao';
 
