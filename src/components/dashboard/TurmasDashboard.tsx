@@ -33,13 +33,24 @@ export const TurmasDashboard: React.FC<TurmasDashboardProps> = ({
     const [selectedMonthFilter, setSelectedMonthFilter] = useState<string>('all');
     const [showActiveFilter, setShowActiveFilter] = useState<string>('all'); // all, active, inactive
 
+    const parseEventDate = (dateStr: string): Date | null => {
+        if (!dateStr) return null;
+        if (dateStr.includes('/')) {
+            const parts = dateStr.split('/');
+            if (parts.length === 3) {
+                return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+            }
+        }
+        return new Date(dateStr);
+    };
+
     // Get unique months for filter
     const availableMonths = useMemo(() => {
         const months = new Set<string>();
         checkouts.forEach(checkout => {
             if (!checkout.eventDate) return;
-            const date = new Date(checkout.eventDate);
-            if (isNaN(date.getTime())) return;
+            const date = parseEventDate(checkout.eventDate);
+            if (!date || isNaN(date.getTime())) return;
             const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
             months.add(monthKey);
         });
@@ -53,8 +64,8 @@ export const TurmasDashboard: React.FC<TurmasDashboardProps> = ({
         checkouts.forEach(checkout => {
             if (!checkout.eventDate) return;
             
-            const date = new Date(checkout.eventDate);
-            if (isNaN(date.getTime())) return;
+            const date = parseEventDate(checkout.eventDate);
+            if (!date || isNaN(date.getTime())) return;
             
             const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
             const monthLabel = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });

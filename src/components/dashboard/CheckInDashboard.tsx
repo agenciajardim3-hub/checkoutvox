@@ -123,7 +123,12 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({ leads, check
                         {selectedCheckout.eventDate && (
                             <span className="flex items-center gap-1">
                                 <Calendar size={12} className="text-gray-300" />
-                                {new Date(selectedCheckout.eventDate + 'T12:00:00').toLocaleDateString('pt-BR')}
+                                {selectedCheckout.eventDate.includes('/') 
+                                    ? selectedCheckout.eventDate 
+                                    : (() => {
+                                        const parts = selectedCheckout.eventDate.split('-');
+                                        return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : selectedCheckout.eventDate;
+                                      })()}
                             </span>
                         )}
                         {selectedCheckout.eventLocation && (

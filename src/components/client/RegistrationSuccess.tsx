@@ -44,7 +44,16 @@ export const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex-1">
                                         <span className="text-[8px] font-black uppercase text-amber-600 tracking-widest flex items-center gap-1"><Clock size={12} /> Data e Horário</span>
-                                        <p className="text-xl font-black text-amber-900 leading-none mt-1.5">{config.eventDate || 'A consultar'}</p>
+                                        <p className="text-xl font-black text-amber-900 leading-none mt-1.5">
+                                            {config.eventDate ? (
+                                                config.eventDate.includes('/') 
+                                                    ? config.eventDate 
+                                                    : (() => {
+                                                        const parts = config.eventDate.split('-');
+                                                        return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : config.eventDate;
+                                                      })()
+                                            ) : 'A consultar'}
+                                        </p>
                                         {(config.eventStartTime || config.eventEndTime) && (
                                             <p className="text-[11px] font-black text-amber-700 mt-1 uppercase tracking-tight">Das {config.eventStartTime || '??:??'} às {config.eventEndTime || '??:??'}</p>
                                         )}
@@ -52,7 +61,7 @@ export const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
                                 </div>
                                 <div className="pt-3 border-t border-amber-100">
                                     <span className="text-[8px] font-black uppercase text-amber-600 tracking-widest flex items-center gap-1"><MapPin size={12} /> Local do Evento</span>
-                                    <p className="text-xs font-bold text-amber-900 leading-tight mt-1.5">{config.eventLocation || 'Auditório Vox'}</p>
+                                    <p className="text-xs font-bold text-amber-900 leading-tight mt-1.5">{config.eventLocation || 'A confirmar'}</p>
                                 </div>
                             </div>
                             <div className="pt-4 flex flex-col items-center">

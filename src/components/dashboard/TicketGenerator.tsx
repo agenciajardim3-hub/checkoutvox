@@ -31,6 +31,18 @@ export const TicketGenerator: React.FC<TicketGeneratorProps> = ({ allCheckouts }
         return dateStr;
     };
 
+    const formatDateForJS = (dateStr?: string) => {
+        if (!dateStr) return '';
+        // If already in DD/MM/YYYY, convert to YYYY-MM-DD for JS Date
+        if (dateStr.includes('/')) {
+            const parts = dateStr.split('/');
+            if (parts.length === 3) {
+                return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+        }
+        return dateStr;
+    };
+
     const getDisplayDate = () => {
         const selectedProd = allCheckouts.find(c => c.id === ticketGenData.productId);
         const dateValue = ticketGenData.date || selectedProd?.eventDate || '';
@@ -108,7 +120,7 @@ export const TicketGenerator: React.FC<TicketGeneratorProps> = ({ allCheckouts }
                <div class="event-info-box">
                   <div class="field" style="margin-bottom: 12px;">
                     <div class="label" style="color: #b45309;">Data e Horário</div>
-                    <div style="font-size: 20px; font-weight: 900; color: #92400e;">${new Date(displayDate + 'T12:00:00').toLocaleDateString('pt-BR')}</div>
+                    <div style="font-size: 20px; font-weight: 900; color: #92400e;">${new Date(formatDateForJS(displayDate) + 'T12:00:00').toLocaleDateString('pt-BR')}</div>
                     <div style="font-size: 14px; font-weight: 800; color: #b45309; margin-top: 5px;">Das ${displayStartTime} às ${displayEndTime}</div>
                   </div>
                   <div class="field" style="margin-bottom: 0;">
