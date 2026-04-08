@@ -60,6 +60,7 @@ export default function App() {
   const isTicketMode = query.get('mode') === 'ticket';
   const isCertificateMode = query.get('mode') === 'certificate';
   const checkoutParam = query.get('checkout') || query.get('p') || '';
+  const ticketCpf = query.get('cpf');
   const utms = {
     source: query.get('utm_source') || 'direct',
     medium: query.get('utm_medium') || 'cpc',
