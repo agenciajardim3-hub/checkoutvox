@@ -357,15 +357,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
                     {setupTab === 'list' && (
                         <div className="animate-in fade-in duration-500">
-                            {console.log('Rendering list tab with', checkouts.length, 'checkouts')}
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
                                 <div>
                                     <h2 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Meus Produtos</h2>
                                     <p className="text-gray-400 text-sm font-bold mt-1 uppercase tracking-widest">Gerencie seus checkouts ativos</p>
                                 </div>
-                                <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-                                    <button onClick={() => setSetupTab('folders')} className="w-full md:w-auto bg-purple-100 text-purple-600 px-8 py-5 rounded-3xl font-black text-xs uppercase shadow-lg hover:bg-purple-600 hover:text-white transition-all flex items-center justify-center gap-3"><Folder size={20} /> Gerenciar Pastas</button>
-                                    <button onClick={() => (setCurrentConfig(createInitialConfig()), setSetupTab('product'))} className="w-full md:w-auto bg-blue-600 text-white px-8 py-5 rounded-3xl font-black text-xs uppercase shadow-2xl shadow-blue-200 hover:bg-blue-700 hover:-translate-y-1 transition-all flex items-center justify-center gap-3"><Plus size={20} /> Novo Checkout</button>
+                                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                                    <button onClick={() => setSetupTab('folders')} className="bg-purple-100 hover:bg-purple-600 text-purple-600 hover:text-white px-6 py-4 rounded-2xl font-black text-xs uppercase transition-all flex items-center justify-center gap-2"><Folder size={18} /> Gerenciar Pastas</button>
+                                    <button onClick={() => (setCurrentConfig(createInitialConfig()), setSetupTab('product'))} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-2xl font-black text-xs uppercase shadow-lg flex items-center justify-center gap-2"><Plus size={18} /> Novo Checkout</button>
                                 </div>
                             </div>
 
