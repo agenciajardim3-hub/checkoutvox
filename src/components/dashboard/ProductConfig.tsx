@@ -2,6 +2,7 @@
 import React, { useMemo } from 'react';
 import { Tag, Wand2, ImageIcon as ImageIconLucide, Loader2, Upload, ImageIcon, PieChart, BarChart3, ListChecks, Plus, Trash2, CheckCircle, PartyPopper, Webhook, Layers, Link as LinkIcon, Megaphone, Users, DollarSign, TrendingUp } from 'lucide-react';
 import { Input } from '../ui/Input';
+import { FolderSelect } from '../ui/FolderSelect';
 import { AppConfig, ProductVariation, Lead } from '../../types';
 
 interface ProductConfigProps {
@@ -319,7 +320,11 @@ export const ProductConfig: React.FC<ProductConfigProps> = ({
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-6">
                                     <Input label="Identificador da Turma" type="text" placeholder="Ex: Turma 05" value={config.turma || ''} onChange={v => setConfig({ ...config, turma: v })} />
-                                    <Input label="Pasta / Categoria" type="text" placeholder="Ex: Cursos, Webinars, etc" value={config.folder || ''} onChange={v => setConfig({ ...config, folder: v })} />
+                                    <FolderSelect
+                                        value={config.folder}
+                                        onChange={v => setConfig({ ...config, folder: v })}
+                                        existingFolders={allCheckouts.map(c => c.folder || 'Sem Pasta').filter(Boolean)}
+                                    />
                                     <Input label="Data do Evento" type="text" placeholder="Ex: 25/12/2024" value={config.eventDate || ''} onChange={v => setConfig({ ...config, eventDate: v })} />
                                 </div>
                                 <div className="space-y-6">

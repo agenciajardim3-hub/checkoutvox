@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Layout, ListChecks, Plus, Ticket, ListFilter, Award, Terminal, LogOut, Eye, Link as LinkIcon, CopyPlus, Loader2, Trash2, GraduationCap, QrCode, Tag, DollarSign, BarChart3, UserCheck, Layers, FileText, FileCheck, Wallet, Signature, Monitor, MessageCircle, Settings, Calendar, ClipboardList } from 'lucide-react';
+import { Layout, ListChecks, Plus, Ticket, ListFilter, Award, Terminal, LogOut, Eye, Link as LinkIcon, CopyPlus, Loader2, Trash2, GraduationCap, QrCode, Tag, DollarSign, BarChart3, UserCheck, Layers, FileText, FileCheck, Wallet, Signature, Monitor, MessageCircle, Settings, Calendar, ClipboardList, Folder } from 'lucide-react';
 import { AppConfig, Lead, UserRole, Coupon } from '../../types';
 import { ProductConfig } from './ProductConfig';
 import { LeadsReport } from './LeadsReport';
@@ -22,6 +22,7 @@ import { CheckoutViews } from './CheckoutViews';
 import { RemarketingDashboard } from './RemarketingDashboard';
 import { GlobalSettings } from './GlobalSettings';
 import { TurmasDashboard } from './TurmasDashboard';
+import { FolderManager } from './FolderManager';
 
 interface DashboardProps {
     userRole: UserRole;
@@ -109,7 +110,46 @@ export const Dashboard: React.FC<DashboardProps> = ({
             console.error('Erro ao mover lead para nova turma:', err);
         }
     };
-    const [setupTab, setSetupTab] = useState<'list' | 'product' | 'integrations' | 'leads' | 'tickets' | 'ticket_logs' | 'certificates' | 'scanner' | 'coupons' | 'overview' | 'checkin' | 'materials' | 'solicitacoes' | 'financeiro' | 'signatures' | 'views' | 'remarketing' | 'global_settings' | 'turmas'>(
+
+    const handleCreateFolder = async (folderName: string) => {
+        // Folder is created by assigning it to a product, just show success
+        alert(`Pasta "${folderName}" criada com sucesso! Agora você pode atribuir produtos a ela.`);
+    };
+
+    const handleRenameFolder = async (oldName: string, newName: string) => {
+        setIsLoadingFolder(true);
+        try {
+            // Update all checkouts with the old folder name to the new folder name
+            const checkoutsToUpdate = checkouts.filter(c => c.folder === oldName);
+            for (const checkout of checkoutsToUpdate) {
+                await onSaveConfig({ ...checkout, folder: newName }, false);
+            }
+            alert(`Pasta renomeada de "${oldName}" para "${newName}" com sucesso!`);
+        } catch (err) {
+            console.error('Erro ao renomear pasta:', err);
+            alert('Erro ao renomear pasta. Tente novamente.');
+        } finally {
+            setIsLoadingFolder(false);
+        }
+    };
+
+    const handleDeleteFolder = async (folderName: string) => {
+        setIsLoadingFolder(true);
+        try {
+            // This shouldn't happen if validation works, but just in case
+            const checkoutsInFolder = checkouts.filter(c => c.folder === folderName);
+            if (checkoutsInFolder.length > 0) {
+                throw new Error('Pasta não está vazia');
+            }
+            alert(`Pasta "${folderName}" deletada com sucesso!`);
+        } catch (err) {
+            console.error('Erro ao deletar pasta:', err);
+            alert('Erro ao deletar pasta. Tente novamente.');
+        } finally {
+            setIsLoadingFolder(false);
+        }
+    };
+    const [setupTab, setSetupTab] = useState<'list' | 'product' | 'integrations' | 'leads' | 'tickets' | 'ticket_logs' | 'certificates' | 'scanner' | 'coupons' | 'overview' | 'checkin' | 'materials' | 'solicitacoes' | 'financeiro' | 'signatures' | 'views' | 'remarketing' | 'global_settings' | 'turmas' | 'folders'>(
         userRole === 'manager' ? 'scanner' : 'overview'
     );
     
@@ -142,6 +182,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
     const [currentConfig, setCurrentConfig] = useState<AppConfig>(createInitialConfig);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoadingFolder, setIsLoadingFolder] = useState(false);
 
     const handleSaveConfigWrapper = async (asNew = false) => {
         setIsSubmitting(true);
@@ -163,6 +204,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         // Produtos
         { id: 'list', label: 'Checkouts', icon: ListChecks, roles: ['master', 'manager'], category: 'produtos' },
         { id: 'product', label: 'Novo Checkout', icon: Plus, roles: ['master'], category: 'produtos' },
+        { id: 'folders', label: 'Pastas', icon: Folder, roles: ['master'], category: 'produtos' },
         { id: 'materials', label: 'Materiais', icon: FileText, roles: ['master'], category: 'produtos' },
         { id: 'coupons', label: 'Cupons', icon: Tag, roles: ['master'], category: 'produtos' },
         
@@ -534,6 +576,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
                                     }
                                 }}
                                 savingId={savingId}
+                            />
+                        </div>
+                    )}
+
+                    {setupTab === 'folders' && (
+                        <div className="animate-in fade-in duration-500">
+                            <FolderManager
+                                checkouts={checkouts}
+                                onCreateFolder={handleCreateFolder}
+                                onRenameFolder={handleRenameFolder}
+                                onDeleteFolder={handleDeleteFolder}
+                                isLoading={isLoadingFolder}
                             />
                         </div>
                     )}
