@@ -9,6 +9,7 @@ interface InputProps {
   onChange: (value: string) => void;
   required?: boolean;
   mask?: 'cpf' | 'phone' | 'none';
+  disabled?: boolean;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -18,7 +19,8 @@ export const Input: React.FC<InputProps> = ({
   value,
   onChange,
   required = true,
-  mask = 'none'
+  mask = 'none',
+  disabled = false
 }) => {
   const formatValue = (val: string) => {
     if (mask === 'cpf') {
@@ -54,7 +56,12 @@ export const Input: React.FC<InputProps> = ({
         placeholder={placeholder}
         value={value}
         onChange={handleChange}
-        className="w-full px-5 py-4 rounded-2xl border-2 border-gray-100 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-bold text-gray-700 bg-gray-50/50 hover:bg-white hover:border-gray-200"
+        disabled={disabled}
+        className={`w-full px-5 py-4 rounded-2xl border-2 outline-none transition-all font-bold ${
+          disabled
+            ? 'border-gray-100 bg-gray-100 text-gray-400 cursor-not-allowed'
+            : 'border-gray-100 bg-gray-50/50 text-gray-700 hover:bg-white hover:border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+        }`}
       />
     </div>
   );
