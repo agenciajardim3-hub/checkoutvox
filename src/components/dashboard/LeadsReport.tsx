@@ -60,6 +60,7 @@ export const LeadsReport: React.FC<LeadsReportProps> = ({
     const [showOnlyTickets, setShowOnlyTickets] = useState(false);
     const [copiedNames, setCopiedNames] = useState(false);
     const [copiedPhones, setCopiedPhones] = useState(false);
+    const [copiedEmails, setCopiedEmails] = useState(false);
     const [showManualLeadForm, setShowManualLeadForm] = useState(false);
     const [manualLead, setManualLead] = useState<Partial<Lead>>({});
     const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
@@ -121,6 +122,43 @@ export const LeadsReport: React.FC<LeadsReportProps> = ({
         navigator.clipboard.writeText(phones);
         setCopiedPhones(true);
         setTimeout(() => setCopiedPhones(false), 2000);
+    };
+
+    const copyAllEmails = () => {
+        const emails = filteredLeadsList
+            .map(l => l.email)
+            .filter(Boolean)
+            .join('\n');
+        navigator.clipboard.writeText(emails);
+        setCopiedEmails(true);
+        setTimeout(() => setCopiedEmails(false), 2000);
+    };
+
+    const exportCSV = () => {
+        const headers = ['Nome', 'Email', 'Telefone', 'CPF', 'Cidade', 'Status', 'Produto', 'Turma', 'Valor Pago', 'Forma Pagamento', 'Data'];
+        const rows = filteredLeadsList.map(l => [
+            l.name || '',
+            l.email || '',
+            l.phone?.replace(/\D/g, '') || '',
+            l.cpf || '',
+            l.city || '',
+            l.status || '',
+            l.product_name || '',
+            l.turma || '',
+            l.paid_amount != null ? String(l.paid_amount) : '',
+            l.payment_method || '',
+            l.created_at ? new Date(l.created_at).toLocaleString('pt-BR') : '',
+        ]);
+        const csvContent = [headers, ...rows]
+            .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+            .join('\n');
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `alunos_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
     };
 
     // Calculate product stats
@@ -372,6 +410,14 @@ export const LeadsReport: React.FC<LeadsReportProps> = ({
 
                 <button onClick={copyAllPhones} className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase transition-all shadow-sm border ${copiedPhones ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'}`}>
                     {copiedPhones ? <Check size={16} /> : <Smartphone size={16} />} {copiedPhones ? 'Copiado!' : 'Copiar Números'}
+                </button>
+
+                <button onClick={copyAllEmails} className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase transition-all shadow-sm border ${copiedEmails ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-violet-600 text-white border-violet-600 hover:bg-violet-700'}`}>
+                    {copiedEmails ? <Check size={16} /> : <Send size={16} />} {copiedEmails ? 'Copiado!' : 'Copiar Emails'}
+                </button>
+
+                <button onClick={exportCSV} className="flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase bg-emerald-600 text-white hover:bg-emerald-700 border border-emerald-600 transition-all shadow-sm">
+                    <FileText size={16} /> Exportar CSV
                 </button>
 
                 <div className="flex items-center gap-3 ml-auto">
