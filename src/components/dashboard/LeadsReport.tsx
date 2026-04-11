@@ -112,6 +112,18 @@ export const LeadsReport: React.FC<LeadsReportProps> = ({
         return result;
     }, [leads, selectedLeadFilter, paymentFilter, searchTerm, showOnlyTickets]);
 
+    const turmaRevenue = useMemo(() => {
+        const selectedProduct = allCheckouts.find(c => c.id === selectedLeadFilter);
+        const turmaToFilter = selectedProduct?.turma;
+
+        if (!turmaToFilter) return 0;
+
+        return filteredLeadsList
+            .filter(l => (l.turma === turmaToFilter || l.turma === selectedProduct?.turma))
+            .filter(l => l.status === 'Pago' || l.status === 'Aprovado')
+            .reduce((total, l) => total + (l.paid_amount || 0), 0);
+    }, [filteredLeadsList, selectedLeadFilter, allCheckouts]);
+
     const copyAllNames = () => {
         const names = filteredLeadsList.map(l => l.name).join('\n');
         navigator.clipboard.writeText(names);
@@ -294,8 +306,8 @@ export const LeadsReport: React.FC<LeadsReportProps> = ({
                         <span className="text-xl font-black text-blue-900">{totalLeadsCount}</span>
                     </div>
                     <div className="flex-1 md:flex-initial bg-emerald-600 p-6 rounded-[2.5rem] shadow-xl text-white">
-                        <div className="flex items-center gap-2 mb-1 opacity-70"><Wallet size={16} /> <span className="text-[9px] font-black uppercase tracking-widest">Total Recebido</span></div>
-                        <span className="text-xl font-black">R$ {totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        <div className="flex items-center gap-2 mb-1 opacity-70"><Wallet size={16} /> <span className="text-[9px] font-black uppercase tracking-widest">Total Recebido {selectedLeadFilter !== 'all' ? '(Turma)' : ''}</span></div>
+                        <span className="text-xl font-black">R$ {(selectedLeadFilter !== 'all' ? turmaRevenue : totalRevenue).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                     </div>
                 </div>
             </div>
