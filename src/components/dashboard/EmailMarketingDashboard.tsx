@@ -366,7 +366,7 @@ export const EmailMarketingDashboard: React.FC<EmailMarketingDashboardProps> = (
                 </div>
 
                 <div className="text-xs text-gray-500 font-bold p-3 bg-gray-50 rounded-xl">
-                  💡 Dica: Use {{'{name}'}} para inserir o nome do destinatário no email
+                  💡 Dica: Use {`{name}`} para inserir o nome do destinatário no email
                 </div>
               </div>
             </div>
