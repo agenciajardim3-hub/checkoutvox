@@ -2,7 +2,8 @@ import React, { useMemo, useState } from 'react';
 import {
     BarChart3, Users, DollarSign, TrendingUp, Search, Filter,
     Download, Mail, MessageCircle, Eye, Edit2, Trash2, Check,
-    AlertCircle, Calendar, MapPin, Phone, GraduationCap, Loader2
+    AlertCircle, Calendar, MapPin, Phone, GraduationCap, Loader2,
+    Copy, FileText, Printer, Smartphone, Send
 } from 'lucide-react';
 import { Lead, AppConfig, UserRole } from '../../types';
 
@@ -35,6 +36,11 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
     const [sortBy, setSortBy] = useState<SortBy>('date');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 12;
+
+    // Copy to clipboard states
+    const [copiedNames, setCopiedNames] = useState(false);
+    const [copiedPhones, setCopiedPhones] = useState(false);
+    const [copiedEmails, setCopiedEmails] = useState(false);
 
     // Filtrar e ordenar leads
     const filteredAndSortedLeads = useMemo(() => {
@@ -119,6 +125,65 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
             default:
                 return 'bg-blue-100 text-blue-700 border-blue-200';
         }
+    };
+
+    // Copy functions
+    const copyAllNames = () => {
+        const names = filteredAndSortedLeads.map(l => l.name).join('\n');
+        navigator.clipboard.writeText(names);
+        setCopiedNames(true);
+        setTimeout(() => setCopiedNames(false), 2000);
+    };
+
+    const copyAllPhones = () => {
+        const phones = filteredAndSortedLeads
+            .map(l => l.phone?.replace(/\D/g, ''))
+            .filter(Boolean)
+            .join('\n');
+        navigator.clipboard.writeText(phones);
+        setCopiedPhones(true);
+        setTimeout(() => setCopiedPhones(false), 2000);
+    };
+
+    const copyAllEmails = () => {
+        const emails = filteredAndSortedLeads
+            .map(l => l.email)
+            .filter(Boolean)
+            .join('\n');
+        navigator.clipboard.writeText(emails);
+        setCopiedEmails(true);
+        setTimeout(() => setCopiedEmails(false), 2000);
+    };
+
+    const exportCSV = () => {
+        const headers = ['#', 'Nome', 'Email', 'Telefone', 'CPF', 'Cidade', 'Status', 'Produto', 'Turma', 'Valor Pago', 'Data'];
+        const rows = filteredAndSortedLeads.map((l, index) => [
+            String(index + 1),
+            l.name || '',
+            l.email || '',
+            l.phone?.replace(/\D/g, '') || '',
+            l.cpf || '',
+            l.city || '',
+            l.status || '',
+            l.product_name || '',
+            l.turma || '',
+            l.paid_amount != null ? String(l.paid_amount) : '',
+            l.created_at ? new Date(l.created_at).toLocaleString('pt-BR') : ''
+        ]);
+        const csvContent = [headers, ...rows]
+            .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+            .join('\n');
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `relatorio_vendas_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const handlePrint = () => {
+        window.print();
     };
 
     return (
@@ -279,6 +344,64 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                             </button>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* Ferramentas e Ações em Massa */}
+            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mb-6">
+                <p className="text-xs font-bold text-gray-600 uppercase mb-4 tracking-widest">Ferramentas</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                    <button
+                        onClick={copyAllNames}
+                        className={`px-4 py-3 rounded-xl font-bold text-xs uppercase transition-all shadow-sm border flex items-center justify-center gap-2 ${
+                            copiedNames
+                                ? 'bg-emerald-600 text-white border-emerald-600'
+                                : 'bg-gray-900 text-white border-gray-900 hover:bg-black'
+                        }`}
+                    >
+                        {copiedNames ? <Check size={16} /> : <Copy size={16} />}
+                        {copiedNames ? 'Copiado!' : 'Copiar Nomes'}
+                    </button>
+
+                    <button
+                        onClick={copyAllPhones}
+                        className={`px-4 py-3 rounded-xl font-bold text-xs uppercase transition-all shadow-sm border flex items-center justify-center gap-2 ${
+                            copiedPhones
+                                ? 'bg-emerald-600 text-white border-emerald-600'
+                                : 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'
+                        }`}
+                    >
+                        {copiedPhones ? <Check size={16} /> : <Smartphone size={16} />}
+                        {copiedPhones ? 'Copiado!' : 'Copiar Telefones'}
+                    </button>
+
+                    <button
+                        onClick={copyAllEmails}
+                        className={`px-4 py-3 rounded-xl font-bold text-xs uppercase transition-all shadow-sm border flex items-center justify-center gap-2 ${
+                            copiedEmails
+                                ? 'bg-emerald-600 text-white border-emerald-600'
+                                : 'bg-violet-600 text-white border-violet-600 hover:bg-violet-700'
+                        }`}
+                    >
+                        {copiedEmails ? <Check size={16} /> : <Send size={16} />}
+                        {copiedEmails ? 'Copiado!' : 'Copiar Emails'}
+                    </button>
+
+                    <button
+                        onClick={exportCSV}
+                        className="px-4 py-3 rounded-xl font-bold text-xs uppercase transition-all shadow-sm border bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 flex items-center justify-center gap-2"
+                    >
+                        <FileText size={16} />
+                        Exportar CSV
+                    </button>
+
+                    <button
+                        onClick={handlePrint}
+                        className="px-4 py-3 rounded-xl font-bold text-xs uppercase transition-all shadow-sm border bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100 flex items-center justify-center gap-2"
+                    >
+                        <Printer size={16} />
+                        Imprimir
+                    </button>
                 </div>
             </div>
 
