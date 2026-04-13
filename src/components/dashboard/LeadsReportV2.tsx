@@ -286,11 +286,18 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
             {viewMode === 'grid' && (
                 <div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                        {paginatedLeads.map((lead) => (
-                            <div key={lead.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all">
+                        {paginatedLeads.map((lead, index) => {
+                            const leadNumber = (currentPage - 1) * itemsPerPage + index + 1;
+                            return (
+                            <div key={lead.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all relative">
+                                {/* Número sequencial */}
+                                <div className="absolute top-4 right-4 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-black text-xs">
+                                    {leadNumber}
+                                </div>
+
                                 {/* Header do Card */}
                                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 border-b border-gray-100">
-                                    <h3 className="font-black text-gray-900 mb-1 truncate">{lead.name}</h3>
+                                    <h3 className="font-black text-gray-900 mb-1 truncate pr-8">{lead.name}</h3>
                                     <p className="text-xs text-gray-500 font-bold truncate">{lead.email}</p>
                                 </div>
 
@@ -368,7 +375,8 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                     </button>
                                 </div>
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             )}
@@ -380,6 +388,7 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="bg-gray-900 text-white">
+                                    <th className="px-4 py-3 text-center font-black uppercase text-xs w-12">#</th>
                                     <th className="px-4 py-3 text-left font-black uppercase text-xs">Nome</th>
                                     <th className="px-4 py-3 text-left font-black uppercase text-xs">Contato</th>
                                     <th className="px-4 py-3 text-left font-black uppercase text-xs">Produto</th>
@@ -392,8 +401,15 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {paginatedLeads.map((lead) => (
+                                {paginatedLeads.map((lead, index) => {
+                                    const leadNumber = (currentPage - 1) * itemsPerPage + index + 1;
+                                    return (
                                     <tr key={lead.id} className="hover:bg-blue-50/30 transition-all">
+                                        <td className="px-4 py-3 text-center">
+                                            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white font-black text-xs">
+                                                {leadNumber}
+                                            </span>
+                                        </td>
                                         <td className="px-4 py-3">
                                             <div className="font-bold text-gray-900">{lead.name}</div>
                                             {lead.city && <div className="text-xs text-gray-500">{lead.city}</div>}
@@ -446,7 +462,8 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                             </button>
                                         </td>
                                     </tr>
-                                ))}
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
