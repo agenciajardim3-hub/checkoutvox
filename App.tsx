@@ -128,11 +128,12 @@ export default function App() {
       const checkoutsData = checkoutData || [];
 
       // OPTIMIZATION: Only fetch leads/coupons for dashboard (not client checkout pages)
+      // EXCEPT: Always fetch for ticket/certificate modes which need lead data
       let leadsData: any = null;
       let couponsData: any = null;
 
-      if (!checkoutParam || userRole !== 'none') {
-        // Dashboard mode - fetch all leads and coupons
+      if (!checkoutParam || userRole !== 'none' || isTicketMode || isCertificateMode) {
+        // Dashboard mode or ticket/certificate mode - fetch all leads and coupons
         const leadsResult = await supabase.from('leads').select('*').order('created_at', { ascending: false });
         leadsData = leadsResult.data;
         if (leadsResult.error && leadsResult.error.code !== 'PGRST116') throw leadsResult.error;
