@@ -166,7 +166,7 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
     };
 
     const exportCSV = () => {
-        const headers = ['#', 'Nome', 'Email', 'Telefone', 'CPF', 'Cidade', 'Status', 'Produto', 'Turma', 'Valor Pago', 'Data e Hora'];
+        const headers = ['#', 'Nome', 'Email', 'Telefone', 'CPF', 'Cidade', 'Pago por', 'Status', 'Produto', 'Turma', 'Valor Pago', 'Data e Hora'];
         const rows = filteredAndSortedLeads.map((l, index) => [
             String(index + 1),
             l.name || '',
@@ -174,6 +174,7 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
             l.phone?.replace(/\D/g, '') || '',
             l.cpf || '',
             l.city || '',
+            l.payer_name || '',
             l.status || '',
             l.product_name || '',
             l.turma || '',
@@ -505,6 +506,18 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                         </div>
                                     )}
 
+                                    {/* Pago por */}
+                                    <div className="flex items-center gap-2 text-xs pt-1">
+                                        <span className="font-bold text-gray-500 uppercase">Pago por:</span>
+                                        <input
+                                            type="text"
+                                            value={lead.payer_name || ''}
+                                            onChange={(e) => onUpdateLeadField?.(lead.id, { payer_name: e.target.value })}
+                                            placeholder="Nome"
+                                            className="flex-1 px-2 py-1 text-xs font-bold text-gray-700 bg-gray-50 border border-gray-200 rounded"
+                                        />
+                                    </div>
+
                                     {/* Turma */}
                                     <div className="flex items-center gap-3 text-sm">
                                         <GraduationCap size={16} className="text-gray-400 flex-shrink-0" />
@@ -620,6 +633,7 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                     <th className="px-4 py-3 text-center font-black uppercase text-xs w-12">#</th>
                                     <th className="px-4 py-3 text-left font-black uppercase text-xs">Nome</th>
                                     <th className="px-4 py-3 text-left font-black uppercase text-xs">Contato</th>
+                                    <th className="px-4 py-3 text-left font-black uppercase text-xs">Pago por</th>
                                     <th className="px-4 py-3 text-left font-black uppercase text-xs">Produto</th>
                                     <th className="px-4 py-3 text-left font-black uppercase text-xs">Status</th>
                                     {userRole === 'master' && (
@@ -659,6 +673,15 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                         <td className="px-4 py-3">
                                             <div className="text-xs font-bold text-emerald-600">{lead.phone}</div>
                                             <div className="text-xs text-gray-500 truncate">{lead.email}</div>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <input
+                                                type="text"
+                                                value={lead.payer_name || ''}
+                                                onChange={(e) => onUpdateLeadField?.(lead.id, { payer_name: e.target.value })}
+                                                placeholder="Nome"
+                                                className="w-full px-2 py-1.5 text-xs font-bold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg"
+                                            />
                                         </td>
                                         <td className="px-4 py-3">
                                             <span className="inline-block bg-amber-100 text-amber-700 px-2.5 py-1 rounded-lg text-xs font-bold">
