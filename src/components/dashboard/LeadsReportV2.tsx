@@ -3,7 +3,7 @@ import {
     BarChart3, Users, DollarSign, TrendingUp, Search, Filter,
     Download, Mail, MessageCircle, Eye, Edit2, Trash2, Check,
     AlertCircle, Calendar, MapPin, Phone, GraduationCap, Loader2,
-    Copy, FileText, Printer, Smartphone, Send
+    Copy, FileText, Printer, Smartphone, Send, Ticket, Award, UserCheck
 } from 'lucide-react';
 import { Lead, AppConfig, UserRole } from '../../types';
 
@@ -15,6 +15,8 @@ interface LeadsReportV2Props {
     onUpdatePaidAmount: (id: string, amount: string) => void;
     onDeleteLead: (id: string) => void;
     savingId: string | null;
+    onCheckIn?: (leadId: string, checkedIn: boolean) => Promise<void>;
+    onUpdateLeadField?: (id: string, fields: Record<string, any>) => Promise<void>;
 }
 
 type ViewMode = 'grid' | 'table' | 'stats';
@@ -27,7 +29,9 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
     onUpdateStatus,
     onUpdatePaidAmount,
     onDeleteLead,
-    savingId
+    savingId,
+    onCheckIn,
+    onUpdateLeadField
 }) => {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const [searchTerm, setSearchTerm] = useState('');
@@ -197,6 +201,20 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
         } else {
             return `Oi ${firstName}, tudo bem? Vi que você tentou se inscrever na ${productName} mas o pagamento não confirmou. Teve alguma dúvida?`;
         }
+    };
+
+    const viewTicket = (lead: Lead) => {
+        const ticketUrl = `${window.location.origin}/?mode=ticket&checkout=${lead.product_id}&cpf=${lead.cpf}`;
+        if (onUpdateLeadField && lead.id) {
+            const emittedBy = localStorage.getItem('vox_user_email') || 'Admin';
+            onUpdateLeadField(lead.id, { emitted_by: emittedBy, emission_date: new Date().toISOString() });
+        }
+        window.open(ticketUrl, '_blank');
+    };
+
+    const viewCertificate = (lead: Lead) => {
+        const certUrl = `${window.location.origin}/?mode=certificate&checkout=${lead.product_id}&cpf=${lead.cpf}`;
+        window.open(certUrl, '_blank');
     };
 
     return (
@@ -493,29 +511,60 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                 </div>
 
                                 {/* Ações */}
-                                <div className="p-4 bg-gray-50 border-t border-gray-100 flex gap-2">
-                                    {lead.phone && (
-                                        <a
-                                            href={`https://wa.me/55${lead.phone?.replace(/\D/g, '') || ''}?text=${encodeURIComponent(generateWhatsAppMessage(lead))}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex-1 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-600 font-bold text-xs uppercase hover:bg-emerald-100 transition-all flex items-center justify-center gap-1"
+                                <div className="p-4 bg-gray-50 border-t border-gray-100 space-y-2">
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <button
+                                            onClick={() => viewTicket(lead)}
+                                            className="px-2 py-1.5 rounded-lg bg-purple-50 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-100 transition-all flex items-center justify-center gap-1"
+                                            title="Ver Ingresso"
                                         >
-                                            <MessageCircle size={14} /> WhatsApp
-                                        </a>
-                                    )}
-                                    <button
-                                        onClick={() => onDeleteLead(lead.id)}
-                                        disabled={savingId === lead.id}
-                                        className="flex-1 px-3 py-2 rounded-lg bg-red-50 text-red-600 font-bold text-xs uppercase hover:bg-red-100 transition-all disabled:opacity-50 flex items-center justify-center gap-1"
-                                    >
-                                        {savingId === lead.id ? (
-                                            <Loader2 size={14} className="animate-spin" />
+                                            <Ticket size={12} /> Ingresso
+                                        </button>
+                                        <button
+                                            onClick={() => viewCertificate(lead)}
+                                            className="px-2 py-1.5 rounded-lg bg-amber-50 text-amber-600 font-bold text-[10px] uppercase hover:bg-amber-100 transition-all flex items-center justify-center gap-1"
+                                            title="Ver Certificado"
+                                        >
+                                            <Award size={12} /> Cert.
+                                        </button>
+                                        {lead.checked_in ? (
+                                            <span className="px-2 py-1.5 rounded-lg bg-emerald-100 text-emerald-600 font-bold text-[10px] uppercase flex items-center justify-center gap-1">
+                                                <UserCheck size={12} /> OK
+                                            </span>
                                         ) : (
-                                            <Trash2 size={14} />
+                                            <button
+                                                onClick={() => onCheckIn?.(lead.id, true)}
+                                                className="px-2 py-1.5 rounded-lg bg-blue-50 text-blue-600 font-bold text-[10px] uppercase hover:bg-blue-100 transition-all flex items-center justify-center gap-1"
+                                                title="Fazer Check-in"
+                                            >
+                                                <Check size={12} /> Check
+                                            </button>
                                         )}
-                                        Apagar
-                                    </button>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {lead.phone && (
+                                            <a
+                                                href={`https://wa.me/55${lead.phone?.replace(/\D/g, '') || ''}?text=${encodeURIComponent(generateWhatsAppMessage(lead))}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="px-2 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 font-bold text-[10px] uppercase hover:bg-emerald-100 transition-all flex items-center justify-center gap-1"
+                                            >
+                                                <MessageCircle size={12} /> Chat
+                                            </a>
+                                        )}
+                                        <button
+                                            onClick={() => onDeleteLead(lead.id)}
+                                            disabled={savingId === lead.id}
+                                            className="px-2 py-1.5 rounded-lg bg-red-50 text-red-600 font-bold text-[10px] uppercase hover:bg-red-100 transition-all disabled:opacity-50 flex items-center justify-center gap-1"
+                                        >
+                                            {savingId === lead.id ? (
+                                                <Loader2 size={12} className="animate-spin" />
+                                            ) : (
+                                                <Trash2 size={12} />
+                                            )}
+                                            Apagar
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             );
@@ -591,14 +640,42 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                         <td className="px-4 py-3 text-xs font-bold text-gray-500">
                                             {lead.created_at && new Date(lead.created_at).toLocaleDateString('pt-BR')}
                                         </td>
-                                        <td className="px-4 py-3 text-center">
-                                            <div className="flex gap-2 justify-center">
+                                        <td className="px-4 py-3">
+                                            <div className="flex flex-wrap gap-1 justify-center">
+                                                <button
+                                                    onClick={() => viewTicket(lead)}
+                                                    className="px-2 py-1 rounded-lg bg-purple-50 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-100 transition-all flex items-center gap-1"
+                                                    title="Ver Ingresso"
+                                                >
+                                                    <Ticket size={12} />
+                                                </button>
+                                                <button
+                                                    onClick={() => viewCertificate(lead)}
+                                                    className="px-2 py-1 rounded-lg bg-amber-50 text-amber-600 font-bold text-[10px] uppercase hover:bg-amber-100 transition-all flex items-center gap-1"
+                                                    title="Ver Certificado"
+                                                >
+                                                    <Award size={12} />
+                                                </button>
+                                                {lead.checked_in ? (
+                                                    <span className="px-2 py-1 rounded-lg bg-emerald-100 text-emerald-600 font-bold text-[10px] uppercase flex items-center gap-1">
+                                                        <UserCheck size={12} />
+                                                    </span>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => onCheckIn?.(lead.id, true)}
+                                                        className="px-2 py-1 rounded-lg bg-blue-50 text-blue-600 font-bold text-[10px] uppercase hover:bg-blue-100 transition-all flex items-center gap-1"
+                                                        title="Check-in"
+                                                    >
+                                                        <Check size={12} />
+                                                    </button>
+                                                )}
                                                 {lead.phone && (
                                                     <a
                                                         href={`https://wa.me/55${lead.phone?.replace(/\D/g, '') || ''}?text=${encodeURIComponent(generateWhatsAppMessage(lead))}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 font-bold text-xs uppercase hover:bg-emerald-100 transition-all"
+                                                        className="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-600 font-bold text-[10px] uppercase hover:bg-emerald-100 transition-all flex items-center gap-1"
+                                                        title="WhatsApp"
                                                     >
                                                         <MessageCircle size={12} />
                                                     </a>
@@ -606,7 +683,8 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                                 <button
                                                     onClick={() => onDeleteLead(lead.id)}
                                                     disabled={savingId === lead.id}
-                                                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 font-bold text-xs uppercase hover:bg-red-100 transition-all disabled:opacity-50"
+                                                    className="px-2 py-1 rounded-lg bg-red-50 text-red-600 font-bold text-[10px] uppercase hover:bg-red-100 transition-all disabled:opacity-50 flex items-center gap-1"
+                                                    title="Apagar"
                                                 >
                                                     {savingId === lead.id ? (
                                                         <Loader2 size={12} className="animate-spin" />

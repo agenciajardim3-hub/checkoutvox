@@ -500,6 +500,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                                 onUpdateStatus={onUpdateLeadStatus}
                                 onUpdatePaidAmount={onUpdateLeadPaidAmount}
                                 onDeleteLead={onDeleteLead}
+                                onCheckIn={onCheckIn}
+                                onUpdateLeadField={onUpdateLeadField}
                             />
                         </div>
                     )}
