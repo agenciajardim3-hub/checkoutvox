@@ -280,11 +280,9 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
         setShowManualLeadForm(true);
     };
 
-    // Handle payment amount changes with formatting
+    // Handle payment amount changes
     const handlePaidAmountChange = (value: string) => {
-        // Allow only numbers, comma and dots
-        const cleaned = value.replace(/[^\d.,]/g, '');
-        setManualLead({ ...manualLead, paid_amount: cleaned as any });
+        setManualLead({ ...manualLead, paid_amount: value as any });
     };
         if (!manualLead.name || !manualLead.product_id) {
             alert('Nome e Produto são obrigatórios');
@@ -420,7 +418,7 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                         </select>
                         <input
                             type="text"
-                            placeholder="Ex: 100,50 ou 100.50"
+                            placeholder="Ex: 100,50"
                             value={manualLead.paid_amount || ''}
                             onChange={(e) => handlePaidAmountChange(e.target.value)}
                             className="px-4 py-2.5 border border-gray-300 rounded-lg font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -767,7 +765,6 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                             <span className="text-xs font-bold text-gray-600 uppercase">Valor:</span>
                                             <input
                                                 type="text"
-                                                inputMode="decimal"
                                                 value={lead.paid_amount || ''}
                                                 onChange={(e) => onUpdatePaidAmount(lead.id, e.target.value)}
                                                 placeholder="0,00"
@@ -947,7 +944,6 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                             <td className="px-4 py-3">
                                                 <input
                                                     type="text"
-                                                    inputMode="decimal"
                                                     value={lead.paid_amount || ''}
                                                     onChange={(e) => onUpdatePaidAmount(lead.id, e.target.value)}
                                                     placeholder="0,00"
