@@ -56,6 +56,10 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
     const [isSubmittingManualLead, setIsSubmittingManualLead] = useState(false);
     const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
 
+    // Temporary states for field editing
+    const [tempPayerNames, setTempPayerNames] = useState<Record<string, string>>({});
+    const [tempPaymentLocations, setTempPaymentLocations] = useState<Record<string, string>>({});
+
     // Verification states
     const [verifiedLeads, setVerifiedLeads] = useState<Set<string>>(() => {
         const saved = localStorage.getItem('vox_verified_leads');
@@ -248,6 +252,26 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
         }
         setVerifiedLeads(newVerified);
         localStorage.setItem('vox_verified_leads', JSON.stringify(Array.from(newVerified)));
+    };
+
+    // Handle payer_name changes with debounce
+    const handlePayerNameChange = (leadId: string, value: string) => {
+        setTempPayerNames(prev => ({ ...prev, [leadId]: value }));
+        // Debounce save
+        const timer = setTimeout(() => {
+            onUpdateLeadField?.(leadId, { payer_name: value });
+        }, 1000);
+        return () => clearTimeout(timer);
+    };
+
+    // Handle payment_location changes with debounce
+    const handlePaymentLocationChange = (leadId: string, value: string) => {
+        setTempPaymentLocations(prev => ({ ...prev, [leadId]: value }));
+        // Debounce save
+        const timer = setTimeout(() => {
+            onUpdateLeadField?.(leadId, { payment_location: value });
+        }, 1000);
+        return () => clearTimeout(timer);
     };
 
     const handleEditLead = (lead: Lead) => {
@@ -694,10 +718,10 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                         <span className="font-bold text-gray-500 uppercase">Pago por:</span>
                                         <input
                                             type="text"
-                                            value={lead.payer_name || ''}
-                                            onChange={(e) => onUpdateLeadField?.(lead.id, { payer_name: e.target.value })}
+                                            value={tempPayerNames[lead.id] !== undefined ? tempPayerNames[lead.id] : (lead.payer_name || '')}
+                                            onChange={(e) => handlePayerNameChange(lead.id, e.target.value)}
                                             placeholder="Nome"
-                                            className="flex-1 px-2 py-1 text-xs font-bold text-gray-700 bg-gray-50 border border-gray-200 rounded"
+                                            className="flex-1 px-2 py-1 text-xs font-bold text-gray-700 bg-gray-50 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                                         />
                                     </div>
 
@@ -706,10 +730,10 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                         <span className="font-bold text-gray-500 uppercase">Local:</span>
                                         <input
                                             type="text"
-                                            value={lead.payment_location || ''}
-                                            onChange={(e) => onUpdateLeadField?.(lead.id, { payment_location: e.target.value })}
+                                            value={tempPaymentLocations[lead.id] !== undefined ? tempPaymentLocations[lead.id] : (lead.payment_location || '')}
+                                            onChange={(e) => handlePaymentLocationChange(lead.id, e.target.value)}
                                             placeholder="Onde foi pago"
-                                            className="flex-1 px-2 py-1 text-xs font-bold text-gray-700 bg-gray-50 border border-gray-200 rounded"
+                                            className="flex-1 px-2 py-1 text-xs font-bold text-gray-700 bg-gray-50 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                                         />
                                     </div>
 
@@ -882,19 +906,19 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                         <td className="px-4 py-3">
                                             <input
                                                 type="text"
-                                                value={lead.payer_name || ''}
-                                                onChange={(e) => onUpdateLeadField?.(lead.id, { payer_name: e.target.value })}
+                                                value={tempPayerNames[lead.id] !== undefined ? tempPayerNames[lead.id] : (lead.payer_name || '')}
+                                                onChange={(e) => handlePayerNameChange(lead.id, e.target.value)}
                                                 placeholder="Nome"
-                                                className="w-full px-2 py-1.5 text-xs font-bold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg"
+                                                className="w-full px-2 py-1.5 text-xs font-bold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                                             />
                                         </td>
                                         <td className="px-4 py-3">
                                             <input
                                                 type="text"
-                                                value={lead.payment_location || ''}
-                                                onChange={(e) => onUpdateLeadField?.(lead.id, { payment_location: e.target.value })}
+                                                value={tempPaymentLocations[lead.id] !== undefined ? tempPaymentLocations[lead.id] : (lead.payment_location || '')}
+                                                onChange={(e) => handlePaymentLocationChange(lead.id, e.target.value)}
                                                 placeholder="Local"
-                                                className="w-full px-2 py-1.5 text-xs font-bold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg"
+                                                className="w-full px-2 py-1.5 text-xs font-bold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                                             />
                                         </td>
                                         <td className="px-4 py-3">
