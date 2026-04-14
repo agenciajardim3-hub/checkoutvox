@@ -54,6 +54,7 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
     const [showManualLeadForm, setShowManualLeadForm] = useState(false);
     const [manualLead, setManualLead] = useState<Partial<Lead>>({});
     const [isSubmittingManualLead, setIsSubmittingManualLead] = useState(false);
+    const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
 
     // Verification states
     const [verifiedLeads, setVerifiedLeads] = useState<Set<string>>(() => {
@@ -249,6 +250,12 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
         localStorage.setItem('vox_verified_leads', JSON.stringify(Array.from(newVerified)));
     };
 
+    const handleEditLead = (lead: Lead) => {
+        setManualLead(lead);
+        setEditingLeadId(lead.id);
+        setShowManualLeadForm(true);
+    };
+
     const handleManualLeadSubmit = async () => {
         if (!manualLead.name || !manualLead.product_id) {
             alert('Nome e Produto são obrigatórios');
@@ -256,8 +263,15 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
         }
         try {
             setIsSubmittingManualLead(true);
-            await onSaveManualLead?.(manualLead);
+            if (editingLeadId) {
+                // Update existing lead
+                await onUpdateLeadField?.(editingLeadId, manualLead);
+            } else {
+                // Create new lead
+                await onSaveManualLead?.(manualLead);
+            }
             setManualLead({});
+            setEditingLeadId(null);
             setShowManualLeadForm(false);
         } catch (err) {
             alert('Erro ao salvar: ' + (err instanceof Error ? err.message : 'Unknown error'));
@@ -280,7 +294,10 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                     <button
                         onClick={() => {
                             setShowManualLeadForm(!showManualLeadForm);
-                            if (!showManualLeadForm) setManualLead({});
+                            if (!showManualLeadForm) {
+                                setManualLead({});
+                                setEditingLeadId(null);
+                            }
                         }}
                         className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all shadow-lg"
                     >
@@ -295,9 +312,13 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="text-xl font-black text-gray-900 flex items-center gap-3">
                             <UserPlus className="text-blue-600" size={24} />
-                            {manualLead.id ? 'Editar Aluno' : 'Adicionar Aluno Manualmente'}
+                            {editingLeadId ? 'Editar Aluno' : 'Adicionar Aluno Manualmente'}
                         </h3>
-                        <button onClick={() => setShowManualLeadForm(false)} className="text-gray-400 hover:text-red-500 transition-all">
+                        <button onClick={() => {
+                            setShowManualLeadForm(false);
+                            setManualLead({});
+                            setEditingLeadId(null);
+                        }} className="text-gray-400 hover:text-red-500 transition-all">
                             <X size={24} />
                         </button>
                     </div>
@@ -356,7 +377,7 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                         </select>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                         <select
                             value={manualLead.status || 'Novo'}
                             onChange={(e) => setManualLead({ ...manualLead, status: e.target.value as any })}
@@ -377,6 +398,13 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                         />
                         <input
                             type="text"
+                            placeholder="Pago por"
+                            value={manualLead.payer_name || ''}
+                            onChange={(e) => setManualLead({ ...manualLead, payer_name: e.target.value })}
+                            className="px-4 py-2.5 border border-gray-300 rounded-lg font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <input
+                            type="text"
                             placeholder="Onde foi pago"
                             value={manualLead.payment_location || ''}
                             onChange={(e) => setManualLead({ ...manualLead, payment_location: e.target.value })}
@@ -388,7 +416,7 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                             className="px-4 py-2.5 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                         >
                             {isSubmittingManualLead ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-                            {isSubmittingManualLead ? 'Salvando...' : 'Salvar'}
+                            {isSubmittingManualLead ? (editingLeadId ? 'Atualizando...' : 'Salvando...') : (editingLeadId ? 'Atualizar' : 'Salvar')}
                         </button>
                     </div>
                 </div>
@@ -732,7 +760,7 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
 
                                 {/* Ações */}
                                 <div className="p-4 bg-gray-50 border-t border-gray-100 space-y-2">
-                                    <div className="grid grid-cols-3 gap-2">
+                                    <div className="grid grid-cols-4 gap-2">
                                         <button
                                             onClick={() => viewTicket(lead)}
                                             className="px-2 py-1.5 rounded-lg bg-purple-50 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-100 transition-all flex items-center justify-center gap-1"
@@ -758,6 +786,15 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                         >
                                             <Check size={12} />
                                         </button>
+                                        {userRole === 'master' && (
+                                            <button
+                                                onClick={() => handleEditLead(lead)}
+                                                className="px-2 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 font-bold text-[10px] uppercase hover:bg-indigo-100 transition-all flex items-center justify-center gap-1"
+                                                title="Editar"
+                                            >
+                                                <Edit2 size={12} />
+                                            </button>
+                                        )}
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                         {lead.phone && (
@@ -923,6 +960,15 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                                 >
                                                     <Check size={12} />
                                                 </button>
+                                                {userRole === 'master' && (
+                                                    <button
+                                                        onClick={() => handleEditLead(lead)}
+                                                        className="px-2 py-1 rounded-lg bg-indigo-50 text-indigo-600 font-bold text-[10px] uppercase hover:bg-indigo-100 transition-all flex items-center gap-1"
+                                                        title="Editar"
+                                                    >
+                                                        <Edit2 size={12} />
+                                                    </button>
+                                                )}
                                                 {lead.phone && (
                                                     <a
                                                         href={`https://wa.me/55${lead.phone?.replace(/\D/g, '') || ''}?text=${encodeURIComponent(generateWhatsAppMessage(lead))}`}
