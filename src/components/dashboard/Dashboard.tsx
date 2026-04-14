@@ -518,7 +518,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                                 onDeleteLead={onDeleteLead}
                                 onCheckIn={onCheckIn}
                                 onSaveManualLead={onSaveManualLead}
-                                onUpdateLeadField={onUpdateLeadField}
+                                onUpdateLeadField={handleUpdateLeadField}
                             />
                         </div>
                     )}
