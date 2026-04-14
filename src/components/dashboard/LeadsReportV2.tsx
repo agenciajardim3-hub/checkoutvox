@@ -282,7 +282,14 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
 
     // Handle payment amount changes
     const handlePaidAmountChange = (value: string) => {
+        console.log('Valor digitado:', value, 'chars:', [...value].map((c, i) => `${i}:${c}(${c.charCodeAt(0)})`)); // DEBUG
         setManualLead({ ...manualLead, paid_amount: value as any });
+    };
+
+    // Wrapper para onUpdatePaidAmount com log
+    const handleUpdatePaidAmountWithLog = (id: string, value: string) => {
+        console.log('Atualizando valor:', value); // DEBUG
+        onUpdatePaidAmount(id, value);
     };
         if (!manualLead.name || !manualLead.product_id) {
             alert('Nome e Produto são obrigatórios');
@@ -766,7 +773,7 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                             <input
                                                 type="text"
                                                 value={lead.paid_amount || ''}
-                                                onChange={(e) => onUpdatePaidAmount(lead.id, e.target.value)}
+                                                onChange={(e) => handleUpdatePaidAmountWithLog(lead.id, e.target.value)}
                                                 placeholder="0,00"
                                                 className="flex-1 px-2 py-1.5 text-sm font-black text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400"
                                             />
@@ -945,7 +952,7 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                                 <input
                                                     type="text"
                                                     value={lead.paid_amount || ''}
-                                                    onChange={(e) => onUpdatePaidAmount(lead.id, e.target.value)}
+                                                    onChange={(e) => handleUpdatePaidAmountWithLog(lead.id, e.target.value)}
                                                     placeholder="0,00"
                                                     className="w-24 px-2 py-1.5 text-xs font-black text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400"
                                                 />
