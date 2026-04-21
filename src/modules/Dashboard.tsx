@@ -6,7 +6,6 @@ import { LeadsReport } from './vendas/LeadsReport';
 import { TurmasDashboard } from './turmas/TurmasDashboard';
 import { FinancialDashboard } from './financeiro/FinancialDashboard';
 import { ExpenseManager } from './financeiro/ExpenseManager';
-import { Expense } from '../shared';
 import { CouponManager } from './financeiro/CouponManager';
 import { ProductConfig } from './config/ProductConfig';
 import { GlobalSettings } from './config/GlobalSettings';
@@ -25,6 +24,8 @@ import { RemarketingDashboard } from './marketing/RemarketingDashboard';
 import { EmailMarketingDashboard } from './marketing/EmailMarketingDashboard';
 import { SupportMaterials } from './marketing/SupportMaterials';
 import { EmailSender } from './marketing/EmailSender';
+
+import { OverviewDashboard } from './vendas/OverviewDashboard';
 
 import { 
   LayoutDashboard, Users, GraduationCap, DollarSign, 
