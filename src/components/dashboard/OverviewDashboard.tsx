@@ -322,28 +322,33 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ leads, che
             
             if (paidLeads.length === 0) return;
 
-            // Calculate days remaining for each lead
-            const leadDays = paidLeads
-                .map(l => {
-                    // Use created_at first, then fall back to date
-                    const d = safeDate(l.created_at || l.date);
-                    if (!d) return null;
-                    const diffTime = refDate.getTime() - d.getTime();
-                    return Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                })
-                .filter((d): d is number => d !== null);
+            // Group leads by date and calculate cumulative count
+            const leadsByDate = new Map<number, number>();
+            
+            paidLeads.forEach(l => {
+                const d = safeDate(l.created_at || l.date);
+                if (!d) return;
+                const diffTime = refDate.getTime() - d.getTime();
+                const daysRemaining = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                const current = leadsByDate.get(daysRemaining) || 0;
+                leadsByDate.set(daysRemaining, current + 1);
+            });
 
-            if (leadDays.length === 0) return;
+            if (leadsByDate.size === 0) return;
 
-            const maxDaysRemaining = Math.max(...leadDays, 1);
+            const allDays = Array.from(leadsByDate.keys()).sort((a, b) => b - a);
+            const maxDaysRemaining = Math.max(...allDays, 1);
             const points: { day: number; count: number }[] = [];
 
-            // Generate points from max days to 0
+            // Generate points with ACCUMULATED count
+            let cumulative = 0;
             const startDay = Math.max(maxDaysRemaining + 1, 1);
 
             for (let day = startDay; day >= 0; day--) {
-                const count = leadDays.filter(ld => ld >= day).length;
-                points.push({ day, count });
+                const dailyCount = leadsByDate.get(day) || 0;
+                cumulative += dailyCount;
+                points.push({ day, count: cumulative });
             }
 
             curves.push({

@@ -8,6 +8,22 @@ import {
 } from 'lucide-react';
 import { Lead, AppConfig, UserRole } from '../../types';
 
+interface TooltipProps {
+    children: React.ReactNode;
+    text: string;
+}
+
+const Tooltip: React.FC<TooltipProps> = ({ children, text }) => {
+    return (
+        <div className="group relative inline-block">
+            {children}
+            <span className="invisible group-hover:visible opacity-0 group-hover:opacity-100 absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-[10px] font-bold text-white bg-gray-900 rounded whitespace-nowrap z-50 transition-all">
+                {text}
+            </span>
+        </div>
+    );
+};
+
 interface LeadsReportV2Props {
     userRole: UserRole;
     leads: Lead[];
@@ -42,8 +58,7 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
     const [selectedStatus, setSelectedStatus] = useState('all');
     const [sortBy, setSortBy] = useState<SortBy>('date');
     const [currentPage, setCurrentPage] = useState(1);
-    const [viewAll, setViewAll] = useState(false);
-    const itemsPerPage = viewAll ? 10000 : 12;
+    const [pageSize, setPageSize] = useState(12);
 
     // Copy to clipboard states
     const [copiedNames, setCopiedNames] = useState(false);
@@ -110,13 +125,21 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
         return result;
     }, [leads, selectedProduct, selectedStatus, searchTerm, sortBy]);
 
-    // Paginação
+    // Paginação com memoização
     const paginatedLeads = useMemo(() => {
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        return filteredAndSortedLeads.slice(startIndex, startIndex + itemsPerPage);
-    }, [filteredAndSortedLeads, currentPage]);
+        if (pageSize === -1) {
+            return filteredAndSortedLeads;
+        }
+        const startIndex = (currentPage - 1) * pageSize;
+        return filteredAndSortedLeads.slice(startIndex, startIndex + pageSize);
+    }, [filteredAndSortedLeads, currentPage, pageSize]);
 
-    const totalPages = Math.ceil(filteredAndSortedLeads.length / itemsPerPage);
+    const totalPages = pageSize === -1 ? 1 : Math.ceil(filteredAndSortedLeads.length / pageSize);
+
+    const handlePageSizeChange = (newSize: number) => {
+        setPageSize(newSize);
+        setCurrentPage(1);
+    };
 
     // Cálculos de estatísticas
     const stats = useMemo(() => {
@@ -602,16 +625,20 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                             >
                                 Tabela
                             </button>
-                            <button
-                                onClick={() => setViewAll(!viewAll)}
-                                className={`flex-1 px-3 py-2.5 rounded-xl font-bold text-xs uppercase transition-all ${
-                                    viewAll
-                                        ? 'bg-purple-600 text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
+                        </div>
+                        <div className="mt-3">
+                            <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Itens por página</label>
+                            <select
+                                value={pageSize}
+                                onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-sm"
                             >
-                                Ver TODOS
-                            </button>
+                                <option value={12}>12 por página</option>
+                                <option value={24}>24 por página</option>
+                                <option value={48}>48 por página</option>
+                                <option value={96}>96 por página</option>
+                                <option value={-1}>Todos</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -680,7 +707,9 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                 <div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                         {paginatedLeads.map((lead, index) => {
-                            const leadNumber = (currentPage - 1) * itemsPerPage + index + 1;
+                            const leadNumber = pageSize === -1 
+                                ? index + 1 
+                                : (currentPage - 1) * pageSize + index + 1;
                             return (
                             <div key={lead.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all relative">
                                 {/* Número sequencial + Verificado */}
@@ -884,7 +913,9 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {paginatedLeads.map((lead, index) => {
-                                    const leadNumber = (currentPage - 1) * itemsPerPage + index + 1;
+                                    const leadNumber = pageSize === -1 
+                                        ? index + 1 
+                                        : (currentPage - 1) * pageSize + index + 1;
                                     return (
                                     <tr key={lead.id} className="hover:bg-blue-50/30 transition-all">
                                         <td className="px-4 py-3 text-center">
@@ -969,63 +1000,81 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="flex flex-wrap gap-1 justify-center">
-                                                <button
-                                                    onClick={() => viewTicket(lead)}
-                                                    className="px-2 py-1 rounded-lg bg-purple-50 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-100 transition-all flex items-center gap-1"
-                                                    title="Ver Ingresso"
-                                                >
-                                                    <Ticket size={12} />
-                                                </button>
-                                                <button
-                                                    onClick={() => viewCertificate(lead)}
-                                                    className="px-2 py-1 rounded-lg bg-amber-50 text-amber-600 font-bold text-[10px] uppercase hover:bg-amber-100 transition-all flex items-center gap-1"
-                                                    title="Ver Certificado"
-                                                >
-                                                    <Award size={12} />
-                                                </button>
-                                                <button
-                                                    onClick={() => toggleCheckIn(lead)}
-                                                    className={`px-2 py-1 rounded-lg font-bold text-[10px] uppercase transition-all flex items-center gap-1 ${
-                                                        lead.checked_in
-                                                            ? 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200'
-                                                            : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-                                                    }`}
-                                                    title="Toggle Check-in"
-                                                >
-                                                    <Check size={12} />
-                                                </button>
-                                                {userRole === 'master' && (
+                                                <Tooltip text="Gerar Ticket">
                                                     <button
-                                                        onClick={() => handleEditLead(lead)}
-                                                        className="px-2 py-1 rounded-lg bg-indigo-50 text-indigo-600 font-bold text-[10px] uppercase hover:bg-indigo-100 transition-all flex items-center gap-1"
-                                                        title="Editar"
+                                                        onClick={() => viewTicket(lead)}
+                                                        className="px-2 py-1 rounded-lg bg-purple-50 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-100 transition-all flex items-center gap-1"
                                                     >
-                                                        <Edit2 size={12} />
+                                                        <Ticket size={12} />
                                                     </button>
+                                                </Tooltip>
+                                                <Tooltip text="Ver Certificado">
+                                                    <button
+                                                        onClick={() => viewCertificate(lead)}
+                                                        className="px-2 py-1 rounded-lg bg-amber-50 text-amber-600 font-bold text-[10px] uppercase hover:bg-amber-100 transition-all flex items-center gap-1"
+                                                    >
+                                                        <Award size={12} />
+                                                    </button>
+                                                </Tooltip>
+                                                <Tooltip text="Check-in">
+                                                    <button
+                                                        onClick={() => toggleCheckIn(lead)}
+                                                        className={`px-2 py-1 rounded-lg font-bold text-[10px] uppercase transition-all flex items-center gap-1 ${
+                                                            lead.checked_in
+                                                                ? 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200'
+                                                                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                                        }`}
+                                                    >
+                                                        <Check size={12} />
+                                                    </button>
+                                                </Tooltip>
+                                                {userRole === 'master' && (
+                                                    <Tooltip text="Editar">
+                                                        <button
+                                                            onClick={() => handleEditLead(lead)}
+                                                            className="px-2 py-1 rounded-lg bg-indigo-50 text-indigo-600 font-bold text-[10px] uppercase hover:bg-indigo-100 transition-all flex items-center gap-1"
+                                                        >
+                                                            <Edit2 size={12} />
+                                                        </button>
+                                                    </Tooltip>
                                                 )}
                                                 {lead.phone && (
-                                                    <a
-                                                        href={`https://wa.me/55${lead.phone?.replace(/\D/g, '') || ''}?text=${encodeURIComponent(generateWhatsAppMessage(lead))}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-600 font-bold text-[10px] uppercase hover:bg-emerald-100 transition-all flex items-center gap-1"
-                                                        title="WhatsApp"
-                                                    >
-                                                        <MessageCircle size={12} />
-                                                    </a>
+                                                    <Tooltip text="WhatsApp">
+                                                        <a
+                                                            href={`https://wa.me/55${lead.phone?.replace(/\D/g, '') || ''}?text=${encodeURIComponent(generateWhatsAppMessage(lead))}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-600 font-bold text-[10px] uppercase hover:bg-emerald-100 transition-all flex items-center gap-1"
+                                                        >
+                                                            <MessageCircle size={12} />
+                                                        </a>
+                                                    </Tooltip>
                                                 )}
-                                                <button
-                                                    onClick={() => onDeleteLead(lead.id)}
-                                                    disabled={savingId === lead.id}
-                                                    className="px-2 py-1 rounded-lg bg-red-50 text-red-600 font-bold text-[10px] uppercase hover:bg-red-100 transition-all disabled:opacity-50 flex items-center gap-1"
-                                                    title="Apagar"
-                                                >
-                                                    {savingId === lead.id ? (
-                                                        <Loader2 size={12} className="animate-spin" />
-                                                    ) : (
-                                                        <Trash2 size={12} />
-                                                    )}
-                                                </button>
+                                                {lead.email && (
+                                                    <Tooltip text="Enviar Email">
+                                                        <a
+                                                            href={`mailto:${lead.email}?subject=${encodeURIComponent(`Confirmação de inscrição - ${lead.product_name || 'Evento'}`)}&body=${encodeURIComponent(`Olá ${lead.name},\n\nSua inscrição foi confirmada!\n\nProduto: ${lead.product_name || 'Evento'}\nTurma: ${lead.turma || 'Geral'}\n\nEm breve você receberá mais informações.`)}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="px-2 py-1 rounded-lg bg-blue-50 text-blue-600 font-bold text-[10px] uppercase hover:bg-blue-100 transition-all flex items-center gap-1"
+                                                        >
+                                                            <Mail size={12} />
+                                                        </a>
+                                                    </Tooltip>
+                                                )}
+                                                <Tooltip text="Apagar">
+                                                    <button
+                                                        onClick={() => onDeleteLead(lead.id)}
+                                                        disabled={savingId === lead.id}
+                                                        className="px-2 py-1 rounded-lg bg-red-50 text-red-600 font-bold text-[10px] uppercase hover:bg-red-100 transition-all disabled:opacity-50 flex items-center gap-1"
+                                                    >
+                                                        {savingId === lead.id ? (
+                                                            <Loader2 size={12} className="animate-spin" />
+                                                        ) : (
+                                                            <Trash2 size={12} />
+                                                        )}
+                                                    </button>
+                                                </Tooltip>
                                             </div>
                                         </td>
                                     </tr>
@@ -1038,27 +1087,32 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
             )}
 
             {/* Paginação */}
-            {totalPages > 1 && (
+            {totalPages > 1 || pageSize === -1 ? (
                 <div className="mt-6 flex items-center justify-between">
                     <div className="text-sm font-bold text-gray-600">
-                        Página {currentPage} de {totalPages} • {filteredAndSortedLeads.length} resultados
+                        {pageSize === -1 
+                            ? `Mostrando todos os ${filteredAndSortedLeads.length} registros`
+                            : `Página ${currentPage} de ${totalPages} • ${filteredAndSortedLeads.length} resultados`
+                        }
                     </div>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                            disabled={currentPage === 1}
-                            className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold text-xs uppercase disabled:opacity-50"
-                        >
-                            ← Anterior
-                        </button>
-                        <button
-                            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                            disabled={currentPage === totalPages}
-                            className="px-4 py-2 rounded-lg bg-blue-600 text-white font-bold text-xs uppercase disabled:opacity-50"
-                        >
-                            Próximo →
-                        </button>
-                    </div>
+                    {pageSize !== -1 && (
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                                disabled={currentPage === 1}
+                                className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold text-xs uppercase disabled:opacity-50"
+                            >
+                                ← Anterior
+                            </button>
+                            <button
+                                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                                disabled={currentPage === totalPages}
+                                className="px-4 py-2 rounded-lg bg-blue-600 text-white font-bold text-xs uppercase disabled:opacity-50"
+                            >
+                                Próximo →
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
 
