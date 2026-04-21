@@ -1,8 +1,33 @@
 
 import React, { useMemo } from 'react';
-import { Tag, Wand2, ImageIcon as ImageIconLucide, Loader2, Upload, ImageIcon, PieChart, BarChart3, ListChecks, Plus, Trash2, CheckCircle, PartyPopper, Webhook, Layers, Link as LinkIcon, Megaphone, Users, DollarSign, TrendingUp } from 'lucide-react';
+import { Tag, Wand2, ImageIcon as ImageIconLucide, Loader2, Upload, ImageIcon, PieChart, BarChart3, ListChecks, Plus, Trash2, CheckCircle, PartyPopper, Webhook, Layers, Link as LinkIcon, Megaphone, Users, DollarSign, TrendingUp, Copy, Check } from 'lucide-react';
 import { Input } from '../../shared/components/Input';
 import { AppConfig, ProductVariation, Lead } from '../../shared';
+import { useState } from 'react';
+
+const CopyLinkButton: React.FC<{ text: string }> = ({ text }) => {
+    const [copied, setCopied] = useState(false);
+    
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
+    };
+
+    return (
+        <button
+            onClick={handleCopy}
+            className={`p-2 rounded-xl transition-all ${copied ? 'bg-emerald-500 text-white' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}`}
+            title={copied ? 'Copiado!' : 'Copiar link'}
+        >
+            {copied ? <Check size={16} /> : <Copy size={16} />}
+        </button>
+    );
+};
 
 interface ProductConfigProps {
     config: AppConfig;
@@ -626,6 +651,26 @@ export const ProductConfig: React.FC<ProductConfigProps> = ({
                                                         className="w-full px-3 py-2 rounded-xl border border-gray-200 outline-none focus:border-blue-500 font-bold text-gray-700 bg-white text-center text-sm"
                                                     />
                                                 </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-blue-50 p-4 rounded-2xl space-y-3 mt-2">
+                                            <div className="flex items-center gap-2 text-blue-600">
+                                                <LinkIcon size={14} />
+                                                <span className="text-[10px] font-black uppercase tracking-widest">Link de Indicação</span>
+                                            </div>
+                                            <p className="text-[10px] text-blue-500 font-medium">
+                                                Compartilhe este link para já aplicar esta variação automaticamente
+                                            </p>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    readOnly
+                                                    value={`${typeof window !== 'undefined' ? window.location.origin : ''}/?checkout=${config.slug || config.id}&variant=${variation.id}`}
+                                                    className="flex-1 px-3 py-2 rounded-xl border border-blue-200 bg-white text-xs font-mono text-gray-600 outline-none"
+                                                />
+                                                <CopyLinkButton 
+                                                    text={`${typeof window !== 'undefined' ? window.location.origin : ''}/?checkout=${config.slug || config.id}&variant=${variation.id}`} 
+                                                />
                                             </div>
                                         </div>
                                     </div>

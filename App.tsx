@@ -92,6 +92,7 @@ export default function App() {
   const isTicketMode = query.get('mode') === 'ticket';
   const isCertificateMode = query.get('mode') === 'certificate';
   const checkoutParam = query.get('checkout') || query.get('p') || '';
+  const variantParam = query.get('variant') || '';
   const utms = {
     source: query.get('utm_source') || 'direct',
     medium: query.get('utm_medium') || 'cpc',
@@ -244,10 +245,22 @@ export default function App() {
     if (checkoutParam && allCheckouts.length > 0) {
       const matched = allCheckouts.find(c => c.slug === checkoutParam || c.id === checkoutParam);
       if (matched) {
+        // Apply variant if present
+        if (variantParam && matched.variations) {
+          const variant = matched.variations.find(v => v.id === variantParam);
+          if (variant) {
+            setConfig({
+              ...matched,
+              productPrice: variant.price,
+              ticketAmount: variant.ticketAmount || 1,
+            });
+            return;
+          }
+        }
         setConfig(matched);
       }
     }
-  }, [checkoutParam, allCheckouts]);
+  }, [checkoutParam, allCheckouts, variantParam]);
 
   // Auto-load ticket when in ticket mode with CPF
   const ticketCpf = query.get('cpf');
