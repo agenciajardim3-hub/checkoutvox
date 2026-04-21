@@ -314,6 +314,8 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
         console.log('Atualizando valor:', value); // DEBUG
         onUpdatePaidAmount(id, value);
     };
+
+    const handleManualLeadSubmit = async () => {
         if (!manualLead.name || !manualLead.product_id) {
             alert('Nome e Produto são obrigatórios');
             return;
@@ -1087,7 +1089,7 @@ export const LeadsReportV2: React.FC<LeadsReportV2Props> = ({
             )}
 
             {/* Paginação */}
-            {totalPages > 1 || pageSize === -1 ? (
+            {(totalPages > 1 || pageSize === -1) && (
                 <div className="mt-6 flex items-center justify-between">
                     <div className="text-sm font-bold text-gray-600">
                         {pageSize === -1 
