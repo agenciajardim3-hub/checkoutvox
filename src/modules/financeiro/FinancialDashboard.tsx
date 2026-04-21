@@ -9,7 +9,7 @@ interface FinancialDashboardProps {
     expenses?: Expense[];
 }
 
-export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({ leads, checkouts }) => {
+export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({ leads, checkouts, expenses = [] }) => {
     const [selectedProduct, setSelectedProduct] = useState<string>('all');
     const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | 'all'>('all');
 
