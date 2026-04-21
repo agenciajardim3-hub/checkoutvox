@@ -8,7 +8,7 @@ import { useNotifications } from './src/services/useNotifications';
 import { usePullToRefresh } from './src/services/usePullToRefresh';
 import { AppConfig, Lead, CustomerData, UserRole, MultiTicketPurchase, Coupon, Expense } from './src/shared';
 // Lazy load Dashboard for code splitting
-const Dashboard = lazy(() => import('./src/modules/Dashboard').then(module => ({ default: module.Dashboard })));
+const Dashboard = lazy(() => import('./src/modules/Dashboard'));
 import { ClientView } from './src/modules/checkout/ClientView';
 import { RegistrationSuccess } from './src/modules/checkout/RegistrationSuccess';
 import { ThankYouPage } from './src/modules/checkout/ThankYouPage';
@@ -1273,9 +1273,15 @@ export default function App() {
            onToggleCouponActive={handleToggleCouponActive}
            onCheckIn={handleCheckIn}
            isOnline={isOnline}
-           pendingSyncCount={pendingSyncCount}
-           onSync={processPendingQueue}
-           onApplyCoupon={handleValidateCoupon}
+            pendingSyncCount={pendingSyncCount}
+            onSync={processPendingQueue}
+            onApplyCoupon={async (code: string) => {
+              const result = await handleValidateCoupon(code);
+              if (result.success && result.coupon) {
+                return result.coupon;
+              }
+              return null;
+            }}
          />
       </Suspense>
       </div>
