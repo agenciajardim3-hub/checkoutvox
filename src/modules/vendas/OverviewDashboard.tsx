@@ -337,15 +337,15 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ leads, che
 
             if (leadsByDate.size === 0) return;
 
-            const allDays = Array.from(leadsByDate.keys()).sort((a, b) => b - a);
-            const maxDaysRemaining = Math.max(...allDays, 1);
+            // Sort days in ascending order (from first lead to event)
+            const allDays = Array.from(leadsByDate.keys()).sort((a, b) => a - b);
+            const minDay = Math.min(...allDays);
+            const maxDay = Math.max(...allDays);
             const points: { day: number; count: number }[] = [];
 
-            // Generate points with ACCUMULATED count
+            // Generate points with ACCUMULATED count (from earliest to latest)
             let cumulative = 0;
-            const startDay = Math.max(maxDaysRemaining + 1, 1);
-
-            for (let day = startDay; day >= 0; day--) {
+            for (let day = minDay; day <= maxDay; day++) {
                 const dailyCount = leadsByDate.get(day) || 0;
                 cumulative += dailyCount;
                 points.push({ day, count: cumulative });
@@ -364,16 +364,20 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ leads, che
     // Adapt data for Recharts (Array of objects where each point corresponds to a day, and includes every turma count)
     const rechartsData = useMemo(() => {
         if (growthData.length === 0) return [];
+        
+        // Find min and max day across all curves
+        let minDay = 0;
         let maxDay = 0;
         growthData.forEach(curve => {
             curve.points.forEach(p => {
+                if (p.day < minDay) minDay = p.day;
                 if (p.day > maxDay) maxDay = p.day;
             });
         });
 
         const data = [];
-        // Start from maxDay down to 0 so the chart draws left to right
-        for (let day = maxDay; day >= 0; day--) {
+        // Start from minDay (earliest) to maxDay (latest) so the chart draws left to right
+        for (let day = minDay; day <= maxDay; day++) {
             const point: any = { day };
             growthData.forEach(curve => {
                 const p = curve.points.find(x => x.day === day);
