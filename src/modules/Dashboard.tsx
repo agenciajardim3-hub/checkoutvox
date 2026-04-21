@@ -207,23 +207,79 @@ const Dashboard: React.FC<DashboardProps> = ({
       case 'support':
         return <SupportMaterials />;
       case 'products':
+        if (editingProduct) {
+          return (
+            <ProductConfig
+              config={editingProduct}
+              setConfig={setEditingProduct as React.Dispatch<React.SetStateAction<AppConfig>>}
+              isUploading={isUploading}
+              uploadService={uploadService}
+              isSubmitting={savingId !== null}
+              onSave={() => {
+                onSaveConfig(editingProduct);
+                setEditingProduct(null);
+              }}
+              onCancel={() => setEditingProduct(null)}
+              allCheckouts={allCheckouts}
+              leads={allLeads}
+            />
+          );
+        }
         return (
-          <ProductConfig
-            checkouts={allCheckouts}
-            leads={allLeads}
-            onSave={onSaveCheckout}
-            onDelete={onDeleteCheckout}
-          />
+          <div className="p-8 animate-in fade-in duration-500">
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h2 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+                  <FolderOpen className="text-blue-600" /> Produtos
+                </h2>
+                <p className="text-gray-400 font-bold mt-1 uppercase tracking-widest text-xs">Gerencie seus checkouts</p>
+              </div>
+              <button
+                onClick={() => setEditingProduct({ id: crypto.randomUUID(), productName: 'Novo Produto', productPrice: '197,00', slug: 'novo-produto', isActive: true } as AppConfig)}
+                className="bg-blue-600 text-white px-6 py-4 rounded-2xl font-black text-xs uppercase shadow-lg shadow-blue-200 hover:bg-blue-700 hover:-translate-y-1 transition-all flex items-center gap-2"
+              >
+                <Plus size={18} /> Novo Produto
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {allCheckouts.length === 0 ? (
+                <div className="col-span-full text-center py-20 bg-white rounded-[2rem] border border-gray-100">
+                  <FolderOpen size={48} className="mx-auto text-gray-300 mb-4" />
+                  <p className="text-gray-500 font-bold">Nenhum produto cadastrado.</p>
+                </div>
+              ) : (
+                allCheckouts.map(checkout => (
+                  <div key={checkout.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 hover:shadow-xl hover:border-blue-100 transition-all group flex flex-col h-full">
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${checkout.isActive ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-500'}`}>
+                          {checkout.isActive ? 'Ativo' : 'Inativo'}
+                        </div>
+                      </div>
+                      <h3 className="text-xl font-black text-gray-900 mb-2">{checkout.productName}</h3>
+                      {checkout.turma && <p className="text-sm font-bold text-gray-400">Turma: {checkout.turma}</p>}
+                    </div>
+                    <button
+                      onClick={() => setEditingProduct(checkout)}
+                      className="mt-6 w-full py-3 bg-gray-50 text-gray-600 rounded-xl font-black text-xs uppercase tracking-widest group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm"
+                    >
+                      Editar Produto
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         );
       case 'settings':
         return <GlobalSettings />;
       case 'integrations':
-        return <IntegrationsStatus />;
+        return <IntegrationsStatus dbStatus={dbStatus} onRetry={onRetryDb} />;
       case 'views':
         return (
           <CheckoutViews
             checkouts={allCheckouts}
-            onUpdate={onSaveCheckout}
           />
         );
       default:
