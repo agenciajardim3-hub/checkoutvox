@@ -3,17 +3,17 @@ import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from
 import { Loader2, RotateCw } from 'lucide-react';
 import { LocalNotifications } from '@capacitor/local-notifications';
 
-import { useSupabase } from './src/hooks/useSupabase';
-import { useNotifications } from './src/hooks/useNotifications';
-import { usePullToRefresh } from './src/hooks/usePullToRefresh';
-import { AppConfig, Lead, CustomerData, UserRole, MultiTicketPurchase, Coupon } from './src/types';
+import { useSupabase } from './src/services/useSupabase';
+import { useNotifications } from './src/services/useNotifications';
+import { usePullToRefresh } from './src/services/usePullToRefresh';
+import { AppConfig, Lead, CustomerData, UserRole, MultiTicketPurchase, Coupon } from './src/shared';
 // Lazy load Dashboard for code splitting
-const Dashboard = lazy(() => import('./src/components/dashboard/Dashboard').then(module => ({ default: module.Dashboard })));
-import { ClientView } from './src/components/client/ClientView';
-import { RegistrationSuccess } from './src/components/client/RegistrationSuccess';
-import { ThankYouPage } from './src/components/client/ThankYouPage';
-import { LoginPage } from './src/components/auth/LoginPage';
-import { SolicitacaoFormPage } from './src/components/client/SolicitacaoFormPage';
+const Dashboard = lazy(() => import('./src/modules/Dashboard').then(module => ({ default: module.Dashboard })));
+import { ClientView } from './src/modules/checkout/ClientView';
+import { RegistrationSuccess } from './src/modules/checkout/RegistrationSuccess';
+import { ThankYouPage } from './src/modules/checkout/ThankYouPage';
+import { LoginPage } from './src/modules/auth/LoginPage';
+import { SolicitacaoFormPage } from './src/modules/checkout/SolicitacaoFormPage';
 
 export default function App() {
   const supabase = useSupabase();
