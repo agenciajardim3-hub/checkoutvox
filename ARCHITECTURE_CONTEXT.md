@@ -24,10 +24,13 @@
 ## Módulos Principais
 
 ### 1. **Vendas** (LeadsReportV2)
-- Relatório completo de leads/vendas
+- Relatório completo de leads/vendas com múltiplas visualizações
 - Filtros por produto, status, data
 - Edição inline de "Pago por" e "Onde foi pago"
 - Busca por CPF, Email, Telefone
+- Seletor de itens por página: 12, 24, 50 ou Todos (com soma acumulada otimizada)
+- Botões de ação: Ingressos, Certificados, Check-in, Editar
+- Adicionar/editar leads manualmente
 - Export CSV
 - Integração com Mercado Pago (Pagamentos)
 
@@ -45,8 +48,9 @@
 ### 4. **Controle de Ingressos** (TicketGenerator, TicketSender)
 - Geração de ingressos únicos por CPF
 - Emissão via PDF
-- Envio por Email (Hostinger SMTP)
+- Envio por Email (Hostinger SMTP via Edge Function)
 - Log de emissões
+- Suporte a variações de ingressos
 
 ### 5. **Remarketing** (RemarketingDashboard)
 - Segmentação por status (Pago, Pendente, Abandonado)
@@ -58,6 +62,17 @@
 - Taxa de conversão
 - Despesas por categoria
 - Relatórios por período
+- Curva de Crescimento (matrículas acumuladas por data)
+
+### 7. **Operações Avançadas**
+- **Envio de Ingressos** (TicketSender) - Envio em lote
+- **Envio de Certificados** (CertificateSender) - Envio em lote
+- **Email Personalizado** (CustomEmailSender) - Envio de emails customizados com HTML
+  - Campo de destinatário
+  - Assunto e corpo (HTML)
+  - Botão "Enviar Teste" (para email configurado)
+  - Botão "Enviar" (para destinatário)
+  - Integração com send-email Edge Function
 
 ## Fluxo de Dados
 
@@ -129,5 +144,5 @@ Envio Automático: Ingressos (Email) + WhatsApp
 
 ---
 
-**Última atualização**: 2026-04-21  
+**Última atualização**: 2026-04-22  
 **Mantido por**: Claude AI

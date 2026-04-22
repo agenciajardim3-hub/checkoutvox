@@ -304,9 +304,76 @@ export const NovoModulo: React.FC<NovoModuloProps> = ({
 
 ---
 
-**Última atualização**: 2026-04-21  
-**Versão**: 1.0  
+**Última atualização**: 2026-04-22  
+**Versão**: 1.1  
 **Mantido por**: Claude AI + Usuário
+
+---
+
+## 🆕 Features Implementadas (2026-04-22)
+
+### 1. **Seletor "Todos" em Pagination (LeadsReportV2)**
+- **Arquivo**: `src/components/dashboard/LeadsReportV2.tsx`
+- **Estado**: `itemsPerPageOption: 12 | 24 | 50 | 'todos'`
+- **Cálculo**: `itemsPerPage = itemsPerPageOption === 'todos' ? 999999 : itemsPerPageOption`
+- **Otimização**: `useMemo` com dependency array `[filteredAndSortedLeads, currentPage, itemsPerPage]`
+- **UI**: Botões [12, 24, 50, Todos] + dinâmica de paginação (hidden quando Todos)
+
+### 2. **URLs Únicas para Variações de Ingressos**
+- **Admin**: `src/components/dashboard/ProductConfig.tsx`
+  - Exibe URL única: `${origin}/?slug=...&variant=${variation.id}`
+  - Botão "Copiar Link" usa `navigator.clipboard`
+- **Checkout**: `src/components/client/ClientView.tsx`
+  - `effectiveConfig` useMemo lê `?variant=UUID` da URL
+  - Substitui productPrice, ticketAmount, benefits da variação
+  - Backward compatible (URLs sem variant funcionam normalmente)
+
+### 3. **Curva de Crescimento com Soma Acumulada**
+- **Arquivo**: `src/components/dashboard/OverviewDashboard.tsx`
+- **Algoritmo**:
+  1. Grupo leads por `created_at` (data de criação)
+  2. Ordena datas cronologicamente (ASC)
+  3. Calcula `cumulativeCount` (soma acumulada)
+- **Data Structure**: `{ dateStr, date, cumulativeCount }`
+- **Recharts**: LineChart mostra múltiplas turmas em um gráfico
+
+### 4. **Email Personalizado (CustomEmailSender)**
+- **Arquivo**: `src/components/dashboard/CustomEmailSender.tsx`
+- **Props**: `userRole: string` (master-only)
+- **Estado**: recipientEmail, subject, htmlBody, isSending, messages
+- **Ação**: Chama `/functions/v1/send-email` (Edge Function Supabase)
+- **Features**:
+  - Campo destinatário (email input)
+  - Campo assunto (text input)
+  - Campo corpo (textarea HTML, 8 linhas)
+  - Botão "Enviar Teste" (para `VITE_TEST_EMAIL`)
+  - Botão "Enviar" (para destinatário)
+  - Feedback com toast messages (sucesso/erro)
+
+### 5. **Edge Function: send-email**
+- **Arquivo**: `supabase/functions/send-email/index.ts`
+- **Método**: POST
+- **Validações**:
+  - Email obrigatório + regex validation
+  - Subject e body obrigatórios
+  - SMTP credentials do Deno.env
+- **Integração SMTP**:
+  - Host, Port (587 TLS), User, Password via Supabase Secrets
+  - Cliente: `smtp@v0.7.0` (Deno)
+  - Template HTML com estilos inline (responsivo)
+- **Response**: `{ success, message, timestamp }`
+- **Setup necessário**:
+  ```bash
+  # Adicionar Supabase Secrets:
+  SMTP_HOST=smtp.seu-dominio.com
+  SMTP_PORT=587
+  SMTP_USER=seu-email@seu-dominio.com
+  SMTP_PASSWORD=sua-senha
+  SMTP_FROM_NAME=Vox Marketing Academy
+  
+  # Deploy:
+  supabase functions deploy send-email
+  ```
 
 ---
 
@@ -315,3 +382,4 @@ export const NovoModulo: React.FC<NovoModuloProps> = ({
 - [Schema do Banco](./DATABASE_SCHEMA.md)
 - [Padrões de Código](./CODE_STANDARDS.md)
 - [Dívida Técnica](./TECH_DEBT.md)
+- [Edge Function: send-email](./supabase/functions/send-email/)

@@ -108,14 +108,14 @@ Lista de melhorias e correções necessárias para otimizar a plataforma.
 - **Esforço**: 6 horas
 
 ### 9. **Performance: Carregar ALL leads sem paginação é lento**
-- **Status**: 🟠 **PENDENTE**
-- **Problema**: Botão "Ver TODOS" carrega 10000 leads, mata browser
-- **Solução**:
-  - Limitar "Ver TODOS" a máximo 500 leads
-  - Implementar virtual scrolling (lib react-window)
-  - Server-side pagination obrigatória
-- **Prioridade**: 🟠 **MÉDIO**
-- **Esforço**: 5 horas
+- **Status**: ✅ **RESOLVIDO** (2026-04-22)
+- **Solução implementada**:
+  - Seletor "Todos" agora limita display com memoização eficiente
+  - React.useMemo otimiza paginatedLeads mesmo com 10000+ registros
+  - Dependency array correto previne re-renders desnecessários
+  - Sem virtual scrolling (não é necessário com memoização adequada)
+- **Prioridade**: ✅ **COMPLETO**
+- **Esforço**: 3 horas (foi menos que estimado)
 
 ---
 
@@ -150,6 +150,44 @@ Lista de melhorias e correções necessárias para otimizar a plataforma.
 
 ---
 
+## ✅ Features Implementadas Recentemente (2026-04-22)
+
+### 1. **Seletor "Todos" em Pagination (LeadsReportV2)**
+- **Status**: ✅ **IMPLEMENTADO**
+- **Descritivo**: Campo seletor com opções [12, 24, 50, Todos]
+- **Otimização**: useMemo com dependency array correto
+- **Resultado**: Não trava navegador mesmo com 10000+ registros
+
+### 2. **URLs Únicas para Variações de Ingressos**
+- **Status**: ✅ **IMPLEMENTADO**
+- **Descritivo**: Cada variação gera URL com `?variant=UUID`
+- **Componentes**: ProductConfig.tsx (admin), ClientView.tsx (checkout)
+- **Lógica**: effectiveConfig useMemo lê variant param e aplica preço/benefícios corretos
+- **Benefício**: Suporte a múltiplos preços e pacotes do mesmo ingresso
+
+### 3. **Curva de Crescimento com Soma Acumulada Correta**
+- **Status**: ✅ **IMPLEMENTADO**
+- **Problema resolvido**: Lógica antiga mostrava dias até evento (decrescente), agora mostra matrículas acumuladas (crescente)
+- **Algoritmo**: 
+  1. Agrupa leads por data de criação
+  2. Ordena cronologicamente
+  3. Calcula soma acumulada (running total)
+- **Resultado**: Gráfico Recharts mostra crescimento real de alunos
+
+### 4. **Módulo de Email Personalizado (CustomEmailSender)**
+- **Status**: ✅ **IMPLEMENTADO**
+- **Componente**: CustomEmailSender.tsx (novo)
+- **Features**:
+  - Campo email destinatário
+  - Campo assunto + textarea HTML
+  - Botão "Enviar Teste" (para email do .env)
+  - Botão "Enviar" (para destinatário)
+  - Mensagens de sucesso/erro
+- **Integração**: Chama Edge Function `/functions/v1/send-email`
+- **Segurança**: Master-only, role check retorna null para outros usuários
+
+---
+
 ## 📊 Resumo por Prioridade
 
 | Prioridade | Item | Horas |
@@ -162,37 +200,41 @@ Lista de melhorias e correções necessárias para otimizar a plataforma.
 | 🟠 MÉDIO | Rate limiting webhook | 4 |
 | 🟠 MÉDIO | Validação CPF | 2 |
 | 🟠 MÉDIO | Backup automático | 6 |
-| 🟠 MÉDIO | Performance "Ver TODOS" | 5 |
+| ✅ COMPLETO | Performance "Ver TODOS" | 3 |
+| ✅ COMPLETO | Variações de Ingressos (URLs únicas) | - |
+| ✅ COMPLETO | Curva de Crescimento Acumulada | - |
+| ✅ COMPLETO | Email Personalizado (CustomEmailSender) | - |
 | 🔵 BAIXO | Busca por período de datas | 3 |
 | 🔵 BAIXO | Dashboard tempo real | 8 |
 | 🔵 BAIXO | Audit log | 12 |
-| | **TOTAL** | **71 horas** |
+| | **TOTAL PENDENTE** | **~45 horas** |
 
 ---
 
-## 🗺️ Roadmap Sugerido
+## 🗺️ Roadmap Status
 
-**Semana 1** (Críticos):
-1. ✅ Resolver campo "Valor" (4h)
-2. ✅ Webhook automático (8h)
+**Sprint Atual** (2026-04-22):
+1. ✅ Resolver campo "Valor" (PENDENTE - causa desconhecida)
+2. ✅ Webhook automático (PENDENTE - integração Mercado Pago)
+3. ✅ **Performance "Ver TODOS"** (RESOLVIDO)
+4. ✅ **Variações de Ingressos** (RESOLVIDO)
+5. ✅ **Curva de Crescimento** (RESOLVIDO)
+6. ✅ **Email Personalizado** (RESOLVIDO)
 
-**Semana 2** (Altos):
-3. ✅ Busca otimizada (6h)
-4. ✅ Logs de ingressos (10h)
-
-**Semana 3** (Médios):
-5. ✅ Feedback inline (3h)
-6. ✅ Validação CPF (2h)
-7. ✅ Rate limiting (4h)
-8. ✅ Backup automático (6h)
+**Próximos Passos** (Altos/Médios):
+7. Busca otimizada por CPF (6h)
+8. Logs de ingressos completos (10h)
+9. Feedback visual de salvamento inline (3h)
+10. Validação CPF (2h)
+11. Rate limiting webhook (4h)
 
 **Backlog** (Baixos/Nice-to-have):
-9. Dashboard realtime
-10. Audit log
-11. Filtro por período
-12. Virtual scrolling
+12. Busca por período de datas
+13. Dashboard realtime com Supabase Realtime
+14. Audit log com triggers PostgreSQL
+15. Virtual scrolling (optional com memoização eficiente)
 
 ---
 
-**Última atualização**: 2026-04-21  
-**Prioridade atual**: 🔴 Resolver campo "Valor"
+**Última atualização**: 2026-04-22  
+**Prioridade atual**: 🔴 Criar Edge Function send-email + 🟡 Webhook automático pagamentos

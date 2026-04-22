@@ -364,4 +364,5 @@ solicitacoes ────── pós-evento, cada pessoa pede certificado
 
 ---
 
-**Última atualização**: 2026-04-21
+**Última atualização**: 2026-04-22  
+**Nota**: Variations JSONB em checkouts suporta múltiplos preços e pacotes de ingressos. Email enviado via Edge Function (não requer nova tabela).
