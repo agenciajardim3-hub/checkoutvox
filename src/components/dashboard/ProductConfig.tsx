@@ -628,6 +628,28 @@ export const ProductConfig: React.FC<ProductConfigProps> = ({
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl space-y-2 mt-2">
+                                            <div className="flex items-center gap-2 text-blue-700">
+                                                <LinkIcon size={14} />
+                                                <span className="text-[10px] font-black uppercase tracking-widest">Link Único da Variação</span>
+                                            </div>
+                                            <div className="bg-white p-3 rounded-xl border border-blue-200">
+                                                <p className="text-xs font-mono text-gray-600 break-all">
+                                                    {`${window.location.origin}/?slug=${config.slug}&variant=${variation.id}`}
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    const url = `${window.location.origin}/?slug=${config.slug}&variant=${variation.id}`;
+                                                    navigator.clipboard.writeText(url);
+                                                    alert('Link copiado!');
+                                                }}
+                                                className="w-full text-xs font-bold text-blue-600 hover:text-blue-700 py-2 px-3 bg-blue-100 rounded-lg transition-all hover:bg-blue-200"
+                                            >
+                                                Copiar Link
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
 
