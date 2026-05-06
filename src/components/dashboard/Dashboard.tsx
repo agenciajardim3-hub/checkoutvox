@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Layout, ListChecks, Plus, Ticket, ListFilter, Award, Terminal, LogOut, Eye, Link as LinkIcon, CopyPlus, Loader2, Trash2, GraduationCap, QrCode, Tag, DollarSign, BarChart3, UserCheck, Layers, FileText, FileCheck, Wallet, Signature, Monitor, MessageCircle, Settings, Calendar, ClipboardList, Mail, Send } from 'lucide-react';
+import { Layout, ListChecks, Plus, Ticket, ListFilter, Award, Terminal, LogOut, Eye, Link as LinkIcon, CopyPlus, Loader2, Trash2, GraduationCap, QrCode, Tag, DollarSign, BarChart3, UserCheck, Layers, FileText, FileCheck, Wallet, Signature, Monitor, MessageCircle, Settings, Calendar, ClipboardList, Mail, Send, Smartphone } from 'lucide-react';
 import { AppConfig, Lead, UserRole, Coupon } from '../../types';
 import { ProductConfig } from './ProductConfig';
 import { LeadsReportV2 } from './LeadsReportV2';
@@ -10,6 +10,7 @@ import { CertificateGenerator } from './CertificateGenerator';
 import { CertificateSender } from './CertificateSender';
 import { TicketSender } from './TicketSender';
 import { CustomEmailSender } from './CustomEmailSender';
+import { AutomationDashboard } from './AutomationDashboard';
 import { IntegrationsStatus } from './IntegrationsStatus';
 import { TicketScanner } from './TicketScanner';
 import { CouponManager } from './CouponManager';
@@ -127,7 +128,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             console.error('Erro ao atualizar lead:', err);
         }
     };
-    const [setupTab, setSetupTab] = useState<'list' | 'product' | 'integrations' | 'leads' | 'tickets' | 'ticket_logs' | 'send_tickets' | 'certificates' | 'send_certificates' | 'custom_email' | 'scanner' | 'coupons' | 'overview' | 'checkin' | 'materials' | 'solicitacoes' | 'financeiro' | 'signatures' | 'views' | 'remarketing' | 'global_settings' | 'turmas' | 'email_marketing'>(
+    const [setupTab, setSetupTab] = useState<'list' | 'product' | 'integrations' | 'leads' | 'tickets' | 'ticket_logs' | 'send_tickets' | 'certificates' | 'send_certificates' | 'custom_email' | 'automacao' | 'scanner' | 'coupons' | 'overview' | 'checkin' | 'materials' | 'solicitacoes' | 'financeiro' | 'signatures' | 'views' | 'remarketing' | 'global_settings' | 'turmas' | 'email_marketing'>(
         userRole === 'manager' ? 'scanner' : 'overview'
     );
     
@@ -191,6 +192,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         { id: 'certificates', label: 'Certificados', icon: Award, roles: ['master'], category: 'operacoes' },
         { id: 'send_certificates', label: 'Enviar Certificados', icon: Mail, roles: ['master'], category: 'operacoes' },
         { id: 'custom_email', label: 'Email Personalizado', icon: Send, roles: ['master'], category: 'operacoes' },
+        { id: 'automacao', label: 'Automação WhatsApp', icon: Smartphone, roles: ['master'], category: 'operacoes' },
         { id: 'email_marketing', label: 'Email Marketing', icon: Send, roles: ['master'], category: 'operacoes' },
         { id: 'solicitacoes', label: 'Solicitações', icon: FileCheck, roles: ['master'], category: 'operacoes' },
         
@@ -619,6 +621,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     {setupTab === 'custom_email' && (
                         <div className="animate-in fade-in duration-500">
                             <CustomEmailSender userRole={userRole} />
+                        </div>
+                    )}
+
+                    {setupTab === 'automacao' && (
+                        <div className="animate-in fade-in duration-500">
+                            <AutomationDashboard userRole={userRole} />
                         </div>
                     )}
 
