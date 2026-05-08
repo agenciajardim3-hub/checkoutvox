@@ -70,9 +70,18 @@ export const ClientView: React.FC<ClientViewProps> = ({
     }, [config]);
 
     useEffect(() => {
-        // Track checkout view
+        // Track checkout view only once per checkout per browser session.
+        // This avoids repeated Supabase writes on refreshes, Android tab restores and remounts.
         if (hasTrackedView.current || !supabase || !effectiveConfig.id) return;
+
+        const trackingKey = `vox_checkout_view_tracked_${effectiveConfig.id}`;
+        if (sessionStorage.getItem(trackingKey) === 'true') {
+            hasTrackedView.current = true;
+            return;
+        }
+
         hasTrackedView.current = true;
+        sessionStorage.setItem(trackingKey, 'true');
 
         const trackView = async () => {
             try {
@@ -87,6 +96,7 @@ export const ClientView: React.FC<ClientViewProps> = ({
                     device_type: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
                 });
             } catch (err) {
+                sessionStorage.removeItem(trackingKey);
                 console.error('Error tracking view:', err);
             }
         };
@@ -103,9 +113,9 @@ export const ClientView: React.FC<ClientViewProps> = ({
                 currency: 'BRL',
             });
         }
-    }, [effectiveConfig]);
+    }, [effectiveConfig, supabase]);
     return (
-        <div className="min-h-screen bg-[#f1f5f9] flex flex-col lg:flex-row items-center justify-center p-6 lg:p-12 gap-10 lg:gap-20 py-16">
+        <div className="min-h-screen bg-[#f1f5f9] flex flex-col lg:flex-row items-center justify-start lg:justify-center px-3 py-4 sm:p-6 lg:p-12 gap-5 sm:gap-8 lg:gap-20 sm:py-10 lg:py-16 overflow-x-hidden">
             {showSuccess && (
                 <RegistrationSuccess
                     customer={customer}
@@ -119,17 +129,17 @@ export const ClientView: React.FC<ClientViewProps> = ({
 
             {/* Payment Redirect Warning Overlay */}
             {showPaymentRedirect && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-                    <div className="bg-white rounded-[3rem] p-10 shadow-2xl max-w-lg w-full text-center animate-in zoom-in-95 duration-300">
-                        <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <Loader2 className="text-amber-600 w-10 h-10 animate-spin" />
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6">
+                    <div className="bg-white rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 shadow-2xl max-w-lg w-full text-center animate-in zoom-in-95 duration-300">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5 sm:mb-6">
+                            <Loader2 className="text-amber-600 w-8 h-8 sm:w-10 sm:h-10 animate-spin" />
                         </div>
-                        <h2 className="text-2xl font-black text-gray-900 mb-4">Redirecionando para o Mercado Pago</h2>
-                        <p className="text-gray-600 font-medium mb-6">
+                        <h2 className="text-xl sm:text-2xl font-black text-gray-900 mb-3 sm:mb-4 leading-tight">Redirecionando para o Mercado Pago</h2>
+                        <p className="text-sm sm:text-base text-gray-600 font-medium mb-5 sm:mb-6 leading-relaxed">
                             Você será redirecionado em alguns segundos para finalizar o pagamento.
                         </p>
-                        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6">
-                            <p className="text-sm text-amber-800 font-bold">
+                        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 sm:mb-6">
+                            <p className="text-sm text-amber-800 font-bold leading-relaxed">
                                 <span className="block mb-1">⚠️ Importante:</span>
                                 A sua inscrição <span className="underline">NÃO</span> é válida como matrícula.
                                 A matrícula só será confirmada após a aprovação do pagamento.
@@ -140,7 +150,7 @@ export const ClientView: React.FC<ClientViewProps> = ({
                         </p>
                         <a
                             href={effectiveConfig.mercadoPagoLink || '#'}
-                            className="inline-block mt-4 bg-green-600 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase hover:bg-green-700 transition-all"
+                            className="inline-block mt-4 bg-green-600 text-white px-6 sm:px-8 py-4 rounded-2xl font-black text-sm uppercase hover:bg-green-700 transition-all"
                         >
                             Ir para o Mercado Pago
                         </a>
