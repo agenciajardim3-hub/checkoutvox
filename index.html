@@ -127,6 +127,70 @@
         }
     </style>
     
+    <!-- Proteção de valores monetários antes de enviar ao Supabase -->
+    <script>
+        (function () {
+            function normalizeMoneyValue(value) {
+                if (value === null || value === undefined || value === '') return 0;
+                if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+
+                var cleaned = String(value)
+                    .replace(/R\$/gi, '')
+                    .replace(/\s/g, '')
+                    .replace(/[^0-9,.-]/g, '');
+
+                if (!cleaned) return 0;
+
+                var hasComma = cleaned.indexOf(',') !== -1;
+                var hasDot = cleaned.indexOf('.') !== -1;
+
+                if (hasComma && hasDot) {
+                    cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+                } else if (hasComma) {
+                    cleaned = cleaned.replace(',', '.');
+                }
+
+                var parsed = Number(cleaned);
+                return Number.isFinite(parsed) ? parsed : 0;
+            }
+
+            function normalizePaidAmountInPayload(payload) {
+                if (!payload || typeof payload !== 'object') return payload;
+
+                if (Array.isArray(payload)) {
+                    return payload.map(normalizePaidAmountInPayload);
+                }
+
+                var next = Object.assign({}, payload);
+                if (Object.prototype.hasOwnProperty.call(next, 'paid_amount')) {
+                    next.paid_amount = normalizeMoneyValue(next.paid_amount);
+                }
+
+                return next;
+            }
+
+            var originalFetch = window.fetch;
+            window.fetch = function (input, init) {
+                try {
+                    var url = typeof input === 'string' ? input : (input && input.url) || '';
+                    var method = (init && init.method ? init.method : '').toUpperCase();
+                    var body = init && init.body;
+                    var isSupabaseLeadWrite = url.indexOf('supabase.co') !== -1 && url.indexOf('/leads') !== -1 && ['POST', 'PATCH', 'PUT'].indexOf(method) !== -1;
+
+                    if (isSupabaseLeadWrite && typeof body === 'string' && body.indexOf('paid_amount') !== -1) {
+                        var parsedBody = JSON.parse(body);
+                        var normalizedBody = normalizePaidAmountInPayload(parsedBody);
+                        init = Object.assign({}, init, { body: JSON.stringify(normalizedBody) });
+                    }
+                } catch (error) {
+                    console.warn('Falha ao normalizar paid_amount antes do envio:', error);
+                }
+
+                return originalFetch.apply(this, arguments.length > 1 ? [input, init] : [input]);
+            };
+        })();
+    </script>
+
     <!-- Meta Pixel Code -->
     <script>
         !function(f,b,e,v,n,t,s)
