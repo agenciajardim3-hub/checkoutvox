@@ -45,7 +45,7 @@ export const Input: React.FC<InputProps> = ({
 
   return (
     <div className="space-y-1.5">
-      <label className="block text-[10px] font-black uppercase text-gray-500 tracking-widest ml-1">
+      <label className="block text-[11px] sm:text-[10px] font-black uppercase text-gray-500 tracking-[0.12em] sm:tracking-widest ml-1">
         {label}
       </label>
       <input
@@ -54,7 +54,7 @@ export const Input: React.FC<InputProps> = ({
         placeholder={placeholder}
         value={value}
         onChange={handleChange}
-        className="w-full px-5 py-4 rounded-2xl border-2 border-gray-100 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-bold text-gray-700 bg-gray-50/50 hover:bg-white hover:border-gray-200"
+        className="w-full px-4 sm:px-5 py-3.5 sm:py-4 rounded-2xl border-2 border-gray-100 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-bold text-[16px] sm:text-base text-gray-700 bg-gray-50/50 hover:bg-white hover:border-gray-200 leading-normal"
       />
     </div>
   );
