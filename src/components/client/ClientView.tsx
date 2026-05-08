@@ -47,9 +47,18 @@ export const ClientView: React.FC<ClientViewProps> = ({
     const hasTrackedView = useRef(false);
 
     useEffect(() => {
-        // Track checkout view
+        // Track checkout view only once per checkout per browser session.
+        // This avoids repeated Supabase writes on refreshes, Android tab restores and remounts.
         if (hasTrackedView.current || !supabase || !config.id) return;
+
+        const trackingKey = `vox_checkout_view_tracked_${config.id}`;
+        if (sessionStorage.getItem(trackingKey) === 'true') {
+            hasTrackedView.current = true;
+            return;
+        }
+
         hasTrackedView.current = true;
+        sessionStorage.setItem(trackingKey, 'true');
 
         const trackView = async () => {
             try {
@@ -64,6 +73,8 @@ export const ClientView: React.FC<ClientViewProps> = ({
                     device_type: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
                 });
             } catch (err) {
+                // Allow another attempt later if the write failed.
+                sessionStorage.removeItem(trackingKey);
                 console.error('Error tracking view:', err);
             }
         };
@@ -80,7 +91,7 @@ export const ClientView: React.FC<ClientViewProps> = ({
                 currency: 'BRL',
             });
         }
-    }, [config]);
+    }, [config, supabase]);
     return (
         <div className="min-h-screen bg-[#f1f5f9] flex flex-col lg:flex-row items-center justify-start lg:justify-center px-3 py-4 sm:p-6 lg:p-12 gap-5 sm:gap-8 lg:gap-20 sm:py-10 lg:py-16 overflow-x-hidden">
             {showSuccess && (
